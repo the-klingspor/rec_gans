@@ -123,7 +123,7 @@ public class MLPGeometry {
         //
         // set up network (biases are used by default).
         //
-        final MultiLayerPerceptron net = new MultiLayerPerceptron(2, 3, 1);
+        final MultiLayerPerceptron net = new MultiLayerPerceptron(2,3,1);
         System.out.println(net.getWeightsNum());
         //
         // perform training.

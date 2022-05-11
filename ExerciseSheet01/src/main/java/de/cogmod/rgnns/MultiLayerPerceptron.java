@@ -216,26 +216,35 @@ public class MultiLayerPerceptron {
             final int prelayersize = this.layer[l - 1];
             //
             for (int i = 0; i < layersize; i++) {
+                // delta_h = phi'(net_h) * dE / dx_h
                 this.delta[l][i] = sigmoidDx(this.net[l][i]) * this.bwbuffer[l][i];
             }
-
-            // todo bias
+            //
+            this.bwbuffer[l-1] = new double[prelayersize];
+            //
             for (int j = 0; j < prelayersize; j++) {
-                this.bwbuffer[l-1] = new double[layersize];
                 for (int i = 0; i < layersize; i++) {
                     // dE / dx_j = sum_i w_j,i delta_i
-                    this.bwbuffer[l-1][j] += this.weights[l][j][i] * this.delta[l][i];
+                    this.bwbuffer[l - 1][j] += this.weights[l][j][i] * this.delta[l][i];
                 }
             }
         }
 
-        // 
+        //
         // Compute the weights derivatives.
         //
         // this.dweights !!!!
         for (int l = 1; l < this.layersnum; l++) {
             final int layersize    = this.layer[l];
             final int prelayersize = this.layer[l - 1];
+
+            // weight derivatives for bias terms
+            if (this.usebias[l]) {
+                for (int j = 0; j < layersize; j++) {
+                    this.dweights[l][prelayersize][j] = BIAS * delta[l][j];
+                }
+            }
+            // weight derivatives for all other weights
             for (int i = 0; i < prelayersize; i++) {
                 for (int j = 0; j < layersize; j++) {
                     // dE / dw_i,j = x_i * delta_j
@@ -281,7 +290,7 @@ public class MultiLayerPerceptron {
         for (int l = 1; l < this.weights.length; l++) {
             for (int i = 0; i < this.weights[l].length; i++) {
                 for (int j = 0; j < this.weights[l][i].length; j++) {
-                    weights[idx++] = this.weights[l][i][j]; 
+                    weights[idx++] = this.weights[l][i][j];
                 }
             }
         }
@@ -292,7 +301,8 @@ public class MultiLayerPerceptron {
         for (int l = 1; l < this.dweights.length; l++) {
             for (int i = 0; i < this.dweights[l].length; i++) {
                 for (int j = 0; j < this.dweights[l][i].length; j++) {
-                    dweights[idx++] = this.dweights[l][i][j]; 
+                    //System.out.println("l: " + l + " i : " + i + " j: " + j + " k : "+ idx + " w: " + this.dweights[l][i][j]);
+                    dweights[idx++] = this.dweights[l][i][j];
                 }
             }
         }
@@ -351,10 +361,13 @@ public class MultiLayerPerceptron {
             for (int j = 0; j < indices.length; j++) {
                 double[] sample        = input[indices[j]];
                 double[] target_sample = target[indices[j]];
-                // delete previous gradients
+                // delete previous gradients ?
                 // this.
                 // forward pass
                 double[] pred = this.forwardPass(sample);
+
+                // accumulate mse
+                errorsum += this.RMSE(pred, target_sample);
 
                 // backward pass
                 this.backwardPass(target_sample);
@@ -366,6 +379,7 @@ public class MultiLayerPerceptron {
                     weightsupdate[k] = - learningrate * dweights[k] + momentumrate * weightsupdate[k];
                     weights[k]       = weights[k] + weightsupdate[k];
                 }
+                this.writeWeights(weights);
             }
             //
             error = errorsum / (double)(input.length);
