@@ -1,0 +1,147 @@
+%!TEX TS-program = pdflatex
+%!TEX TS-options = -shell-escape
+% Author: Phil Steinhorst, p.st@wwu.de
+% https://github.com/phist91/latex-templates
+
+\newcommand{\obenlinks}{Recurrent and Generative Artificial Neural Networks}
+\input{config.tex}	% Präambel (ohne die geht nichts!)
+\begin{document}
+\begin{center}
+	\begin{tabular}{|rlp{4cm}rl|}
+	\hline
+	 \textbf{Exercise Sheet} & 02  &  & \textbf{1. Team Partner:} & Lennart Slusny  \\
+	 \textbf{Task} & 01 & & \textbf{2. Team Partner:} & Joschka Strüber \\ \hline
+	\end{tabular}
+\end{center} 
+
+\textbf{(a)} How can LSTMs and other gated memory units learn to count and solve other discrete tasks? What is expected to happen during training?
+
+\textbf{Answer:} 
+
+- time steps of calculations act as natural source of discreteness
+
+\todo{wie läuft Training ab? Was wird vergessen, was durchgelassen, wie funktioniert BPPTT?}
+
+\textbf{(b)} Consider a single LSTM unit with D memory cells. Starting with 
+
+\begin{equation}
+	\delta_\phi^t = \frac{\partial E}{\partial \operatorname{net}_\phi^t}
+\end{equation}
+
+derive the forget gate gradient of the LSTM:
+
+\begin{equation}
+	\delta_\phi^t = \varphi'_\phi(\operatorname{net}_\phi^t) \sum_{c=1}^{D} \zeta_c^t s_t^{t-1}
+\end{equation}
+
+\textbf{Answer:} \todo{V. 2 F. 23, V. 4 F. 21+23}
+
+\textbf{(c)} Can bidirectional RNNs be effectively used for online classification, that is generating a classification label for every new input immediately? Explain briefly.
+
+\textbf{Answer:} No, that is in general not possible. To make inference, a bidirectional RNN needs both pretemporal and posttemporal context to compute an output. However, in  online classification, only the pretemporal context is available. To get the posttemporal context, we would have to get to the end of a timeseries and compute the recurrence back in time, which is impossible in this context.
+
+
+\begin{center}
+	\begin{tabular}{|rlp{11cm}|}
+		\hline
+		\textbf{Task} & 02 & \\ \hline
+	\end{tabular}
+\end{center} 
+
+\textbf{(a)} Name three forms of commonly applied regularization techniques for neural networks and describe their effects.
+
+\textbf{Answer:}
+
+\todo{Early Stopping, Weight Decay, Label Smoothing (V. 2 F. 37)}
+
+\textbf{(b)} Explain the internal covariate shift and how it has been addressed in the literature.
+
+\textbf{Answer:}
+
+\todo{V. 2, F. 49: Output jeder Layer hängt von Statistiken der Inputs ab, diese verändern sich mit jedem Trainingsschritt aufgrund veränderlicher Gewichte -> Layer muss lernen Effekt auszugleichen, aber instable Target. Lösung: Batch Normalization}
+
+\textbf{(c)} Consider the following statement: The more parameters a neural network has the better it will generalize. Is this statement true?
+
+\textbf{Answer:}
+
+\todo{V. 2 F. 54: Höhere Wahrscheinlichkeit auch sehr komplexe Funktionen zu lernen, ohne Gegenmaßnahmen (Regularisierung) höhere Wahrscheinlichkeit des Overfittings. Überparametrisierung kann auch zu double-descent risk curve führen mit besserer Generalisierung, s. Belkin et al. 2019}
+
+\textbf{(d)} What is the effect of residual blocks on the gradient flow in deep networks?
+
+\textbf{Answer:}
+
+\todo{V 2, F. 61: Backward Gradient wird entlang Residual Connection additiv propagiert. }
+
+\begin{center}
+	\begin{tabular}{|rlp{11cm}|}
+		\hline
+		\textbf{Task} & 03 & \\ \hline
+	\end{tabular}
+\end{center} 
+
+\textbf{(a)} What is the general purpose of autoencoders (AEs) and what are their main components? Give an illustration.
+
+\textbf{Answer:}
+
+\todo{V3 F4: Compress instances and generate similar ones, encoder and decoder structure}
+
+\textbf{(b)} Briefly explain the purpose of the KL divergence.
+
+\textbf{Answer:}
+
+\todo{Misst die Unähnlichkeit einer Verteilung P von einer Referenzverteilung Q. Misst die erwartete zusätzliche Shannon-Information, wenn Q anstelle der wahren Verteilung P verwendet wird.}
+
+\textbf{(c)} Given two discrete probability distributions $Q, P$. Show that $\operatorname{KL}(Q || P) = \operatorname{KL}(P || Q)$ does not hold in general.
+
+\textbf{Answer:}
+
+%- 0.3 * log_2(0.3/0.5) - 0.7 * log_2(0.7/0.5) = -0.1187
+
+%- 0.5 * log_2(0.5/0.3) - 0.5 * log_2(0.5/0.7) = -0.1258
+
+\todo{Super simpel mit $p_1 = 0.3, p_2 = 1-p_1 = 0.7, q_1=q_2=0.5$}
+
+\textbf{(d)} Briefly describe the re-parametrization trick and explain why it is necessary to train a VAE.
+
+\textbf{Answer:}
+
+\todo{V3 F12: Verwende N(0,1) als Zielverteilung, das sorgt für simple Form der KL-Divergence, die differenzierbar ist. }
+
+\textbf{(e)} Name a frequently mentioned drawback of VAEs and give one example from the literature that addresses this issue.
+
+\textbf{Answer:}
+
+\todo{Unscharfe Bilder, Lösung z.B. VQ-VAE II}
+
+\textbf{(f)} What are the major differences of the variational autoencoders (VAEs) in comparison with standard autoencoders? Relate your answer to the two sub-losses that are optimized during VAE training.
+
+\textbf{Answer:}
+
+\todo{AE: nur reconstruction loss, VAE: reconstruction loss + variational loss als KL div, um latent codes zu N(0,1) zu pushen. Das erlaubt Generierung von neuen Elementen aus der Distribution durch samplen von Latent Codes aus Standardnormalverteilung.}
+
+\textbf{(g) Bonus:} Show that the $\operatorname{KL}$-divergence between two Gaussian distributions simplifies in the following form, if the reference distribution is the standard normal:
+
+\begin{equation}
+	\operatorname{KL}(N(\mathbf{\mu}, \mathbf{\Sigma})|| N(\mathbf{0}, \mathbf{I})
+\end{equation}
+
+\begin{center}
+	\begin{tabular}{|rlp{11cm}|}
+		\hline
+		\textbf{Task} & 03 & \\ \hline
+	\end{tabular}
+\end{center} 
+
+\textbf{(a)} Illustrate the major structure of GANs and name the essential components. Briefly describe the principle. 
+
+\textbf{Answer:}
+
+\todo{Generator generiert Daten basierend auf random input. Discriminator muss generierte und echte Daten unterscheiden.}
+
+\textbf{(b)} Elaborate on why the training of GANs is considered as particularly difficult/challenging and how it is addressed. Comment on what happens if the discriminator dominates the generator and vice versa.
+
+\textbf{Answer:}
+
+\todo{Joint optimization von zwei verschiedenen Netzwerken. Trainingsziele beider Netze müssen anspruchsvoll, aber nicht unmöglich sein. Discriminator dominates generator: generator lernt nicht wie er Daten generieren kann, die Discriminator überlisten. Generator dominiert Discriminator: Discriminator übt keinen Druck auf Generator aus bessere Daten zu erzeugen und dieser stagniert.}
+
+\end{document}
