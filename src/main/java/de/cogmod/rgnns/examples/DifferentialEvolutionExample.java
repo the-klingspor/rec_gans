@@ -47,7 +47,7 @@ public class DifferentialEvolutionExample {
             @Override
             public int arity() {
                 return sizex;
-            }
+            } // is W_reservoir + W_input
             @Override
             /**
              * This is the callback method that is called from the 

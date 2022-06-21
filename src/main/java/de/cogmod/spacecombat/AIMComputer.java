@@ -1,6 +1,7 @@
 package de.cogmod.spacecombat;
 
 
+import java.io.*;
 import java.util.List;
 import java.util.Random;
 
@@ -13,6 +14,11 @@ import de.cogmod.spacecombat.simulation.Missile;
 import de.cogmod.spacecombat.simulation.SpaceSimulation;
 import de.cogmod.spacecombat.simulation.SpaceSimulationObserver;
 import de.jannlab.io.Serializer;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
 
 /**
  * @author Sebastian Otte
@@ -100,6 +106,8 @@ public class AIMComputer implements SpaceSimulationObserver {
     @Override
     public void simulationStep(final SpaceSimulation sim) {
         //
+        boolean record = true;
+        //
         synchronized (this) {
             //
             if (!this.targetlocked) return;
@@ -116,8 +124,22 @@ public class AIMComputer implements SpaceSimulationObserver {
             //
             // TODO: Update trained ESN with current observation (teacher forcing) ...
             //
-            
-            // ...
+            if (record) {
+                // Only Record Trajectory
+                try {
+                    writeSequence( "data/test.txt",update);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                this.enemyesn.teacherForcing(update);
+                this.enemyesn.forwardPassOscillator();
+                this.enemyesncopy = new EchoStateNetwork(3, this.enemyesn.reservoirsize, 3);
+                double[] weights = new double[this.enemyesn.getWeightsNum()];
+                this.enemyesn.readWeights(weights);
+                this.enemyesncopy.writeWeights(weights);
+            }
             
             //
             // use copy of the RNN to generate future projection (replace dummy method).
@@ -311,7 +333,20 @@ public class AIMComputer implements SpaceSimulationObserver {
         }
         
     }
-    
+    public static void writeSequence(final String filepath,final double[] values) throws IOException {
+        File fout = new File("filepath");
+        FileOutputStream fos = new FileOutputStream(fout);
+
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+
+        for (int i = 0; i < values.length; i++) {
+            String tempStr = String.valueOf(values[i]);
+            bw.write(tempStr);
+            bw.newLine();
+        }
+
+        bw.close();
+    }
     public AIMComputer() {
         this.loadESN();
         this.loadRNN();

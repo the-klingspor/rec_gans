@@ -1,5 +1,8 @@
 package de.cogmod.rgnns;
 
+import java.sql.Array;
+import java.util.Random;
+import java.util.Arrays;
 import static de.cogmod.rgnns.ReservoirTools.*;
 
 /**
@@ -10,6 +13,8 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
     private double[][] inputweights;
     private double[][] reservoirweights;
     private double[][] outputweights;
+
+    public int reservoirsize;
     
     public double[][] getInputWeights() {
         return this.inputweights;
@@ -18,6 +23,8 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
     public double[][] getReservoirWeights() {
         return this.reservoirweights;
     }
+
+    public double[] getReservoirActivations() { return this.getAct()[1][1]; }
     
     public double[][] getOutputWeights() {
         return this.outputweights;
@@ -33,6 +40,7 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         this.inputweights     = this.getWeights()[0][1];
         this.reservoirweights = this.getWeights()[1][1];
         this.outputweights    = this.getWeights()[1][2];
+        this.reservoirsize = reservoirsize;
         //
     }
     
@@ -100,15 +108,61 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         final int training,
         final int test
     ) {
-        // Do I train over the same sequence?
-        // How long should the teacherForcing training be? - Row size of M
-        // Sequence = Number of Sequences x Squence Length ? Muss ich 1000 Sequences aufnehmen?
-        // How to write Weights (Seralizer), map double[][] to double[]
-        // How to keep information after Training run or does M expand to inf - Baches?
-        // Why copy ESN in generateESNFutureProjection before unrolling prediction?
-        // => To have one Network in actual state of the simulation, while the other predicts into the future
-        // ?=> How does the ESN no old locations - it has to be washed in bevor prediction, teacher forcer all the time!
-        // Have *random* weights in the realm of 10^-8 for Input Weights? And scale W0 with eigenvalue
+        double[][] train_seq = Arrays.copyOfRange(sequence,washout,washout+training);
+        double[][] test_seq = Arrays.copyOfRange(sequence,washout+training,washout+training+test);
+
+        System.out.println("washout with teacher forcing");
+
+        // Washout Run
+        int t;
+        for (t=0; t < washout; t++) {
+            double[] output = this.forwardPassOscillator();
+            this.teacherForcing(sequence[t]);
+        }
+
+        // Training Run
+        double[][] M = new double[training][this.reservoirsize + 1]; // +1 für Bias oder nicht
+        for (int step = 0; step < training; step++){
+            double[] output = this.forwardPassOscillator();
+            M[step] = this.getReservoirActivations();
+            this.teacherForcing(sequence[washout+step]);
+        }
+        // Calculate new Weight
+        solveSVD(M, train_seq, this.getOutputWeights()); // Null spalte für Bias ist dabei, könnte man löschen, vlt wird der optimizer confused, ich bins :D
+
+
+        // Test Run
+        double[][] M_test = new double[test][this.getLastInputLength()];
+        this.teacherForcing(sequence[washout+training]);
+        for (int step = 0; step < test; step++){
+            double[] output = this.forwardPassOscillator();
+            M_test[step] = output;
+        }
+
+        // calculate MSE
+        double error = RMSE(M_test,test_seq);
+
+        return error; // error.
+    }
+
+    
+}
+
+// Generelle Fragen
+// Nur non-linear im Reservour - keine gelernten non-linearities?
+// -> Kann man so auch sowas wie einen Sinus mit exponentiell wachsender Amplitude modellieren?
+// Tutorial fuer VAE  : towards science varational auto encoder code tutorial
+
+
+// Do I train over the same sequence?
+// How long should the teacherForcing training be? - Row size of M
+// Sequence = Number of Sequences x Squence Length ? Muss ich 1000 Sequences aufnehmen?
+// How to write Weights (Seralizer), map double[][] to double[]
+// How to keep information after Training run or does M expand to inf - Baches?
+// Why copy ESN in generateESNFutureProjection before unrolling prediction?
+// => To have one Network in actual state of the simulation, while the other predicts into the future
+// ?=> How does the ESN no old locations - it has to be washed in before prediction, teacher forcer all the time!
+// Have *random* weights in the realm of 10^-8 for Input Weights? And scale W0 with eigenvalue
 
         /*
         // Just checking W_out
@@ -120,55 +174,12 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         System.out.println(matrixAsString(this.outputweights,2));
         */
 
-        int training_sequence_length = 200;
-        for (int trainingstep = 0; trainingstep < training; trainingstep++) {
-            System.out.println("washout with teacher forcing");
-            //
-            int t;
-            for (t=0; t < washout; t++) {
+//for (int trainingstep = 0; trainingstep < training; trainingstep++) {
 
-                //
-                // The semantic here is as follows:
-                //
-                // o We assume that the current target value
-                //   is the desired output of the current
-                //   calculation step of the ESN -> thus,
-                //   we want that ideally output is the
-                //   same as target.
-                //
-                // o Via teacher forcing,
-                //   we enforce the ESN to unfold its
-                //   dynamics as it would have produced
-                //   target as output.
-                //
-                this.teacherForcing(sequence[t]);
-
-                //
-                // Perform an oscillator forward pass
-                // in which the esn is fed with its
-                // previous output (note that during
-                // teacher forcing the output of the ESN
-                // is overwritten with the target)
-                //
-                double[] output = this.forwardPassOscillator();
-                //System.out.println(output);
-            }
-            double[][] M = new double[training_sequence_length][this.getLastInputLength()];
-            for (int step = 0; step < training_sequence_length; step++){
-                this.teacherForcing(sequence[t+step]);
-                double[] output = this.forwardPassOscillator();
-                M[step] = output;
-            }
-            final double[][] W_out   = new double[this.outputweights.length][this.outputweights[0].length];
-            solveSVD(M, sequence, W_out);
-            //this.writeWeights(W_out);
+//error
+        /*
+        double error = 0;
+        for (int i=0; i< test; i++){
+            error = error + (comp_seq[0][i] - test_seq[0][i]) * (comp_seq[0][i] - test_seq[0][i]);
         }
-        return 0.0; // error.
-    }
-    
-}
-
-// Generelle Fragen
-// Nur non-linear im Reservour - keine gelernten non-linearities?
-// -> Kann man so auch sowas wie einen Sinus mit exponentiell wachsender Amplitude modellieren?
-//
+*/
