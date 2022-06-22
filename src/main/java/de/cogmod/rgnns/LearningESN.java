@@ -24,7 +24,7 @@ public class LearningESN {
         //esn.trainESN(sequence,washout,training,test);
 
         try {
-            double[][] Seq = loadSequence("data/sequence.txt");
+            double[][] Seq = loadSequence("data/Sequence_recording.txt");
 
             System.out.println(Seq.length);
         }

@@ -24,7 +24,7 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         return this.reservoirweights;
     }
 
-    public double[] getReservoirActivations() { return this.getAct()[1][1]; }
+    public double[] getReservoirActivations;
     
     public double[][] getOutputWeights() {
         return this.outputweights;
@@ -53,7 +53,7 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
     public double[] output() {
         //
         final double[][][] act = this.getAct();
-        final int outputlayer  = this.getOutputLayer(); 
+        final int outputlayer  = this.getOutputLayer();
         //
         final int n = act[outputlayer].length;
         //
@@ -63,6 +63,28 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         for (int i = 0; i < n; i++) {
             result[i] = act[outputlayer][i][t];
         }
+        //
+        return result;
+    }
+
+    public double[] getReservoirActivations() {
+        //
+        final int bias = 1;
+        final double[][][] act = this.getAct();
+        final int reservoirLayer  = this.getOutputLayer() - 1;
+        //
+        final int n = act[reservoirLayer].length + bias;
+        //
+        final double[] result = new double[n];
+        final int t = Math.max(0, this.getLastInputLength() - 1);
+        //
+        for (int i = 0; i < n - bias; i++) {
+            result[i] = act[reservoirLayer][i][t];
+        }
+        if(bias == 1) {
+            result[n - 1] = 0;
+        }
+
         //
         return result;
     }

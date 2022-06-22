@@ -73,7 +73,31 @@ public class AIMComputer implements SpaceSimulationObserver {
     	//
     	// TODO: Implement me.
     	//
-    	return null;
+        double[][] pred = new double [timesteps][3];
+        for (int t=0; t<timesteps; t++){
+            pred[t] = this.enemyesncopy.forwardPassOscillator();
+        }
+
+        Vector3d last           = this.enemy.getRelativePosition();
+        final Vector3d dir      = new Vector3d();
+        final Vector3d[] result = new Vector3d[timesteps];
+        //
+        for (int t = 0; t < timesteps; t++) {
+            dir.x = pred[0];
+            dir.y = pred[1];
+            dir.z = pred[2];
+            //
+            Vector3d.normalize(dir, dir);
+            //
+            dir.x *= 1.0;
+            dir.y *= 1.0;
+            dir.z *= 1.0;
+
+            final Vector3d current = Vector3d.add(last, dir);
+            result[t] = Vector3d.add(current, enemy.getOrigin());
+            last = current;
+        }
+        return result;
     }
     
     // maybe only required for dummy trajectory.
@@ -127,14 +151,14 @@ public class AIMComputer implements SpaceSimulationObserver {
             if (record) {
                 // Only Record Trajectory
                 try {
-                    writeSequence( "data/test.txt",update);
+                    writeSequence( "data/Sequence.txt",update);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
             else {
-                this.enemyesn.teacherForcing(update);
                 this.enemyesn.forwardPassOscillator();
+                this.enemyesn.teacherForcing(update);
                 this.enemyesncopy = new EchoStateNetwork(3, this.enemyesn.reservoirsize, 3);
                 double[] weights = new double[this.enemyesn.getWeightsNum()];
                 this.enemyesn.readWeights(weights);
@@ -144,7 +168,8 @@ public class AIMComputer implements SpaceSimulationObserver {
             //
             // use copy of the RNN to generate future projection (replace dummy method).
             //
-            this.enemytrajectoryprediction = this.generateDummyFutureProjection(PREDICTION_LENGTH);
+            //this.enemytrajectoryprediction = this.generateDummyFutureProjection(PREDICTION_LENGTH);
+            this.enemytrajectoryprediction = generateESNFutureProjection(PREDICTION_LENGTH);
             //
             // grab the most recently launched missile that is alive.
             //
@@ -178,7 +203,7 @@ public class AIMComputer implements SpaceSimulationObserver {
             //
             // TODO: load pretrained ESN.
             //
-            /* // !!! uncomment block to load ESN weight from file.
+             // !!! uncomment block to load ESN weight from file.
             
             final String esnweightsfile = (
                 "data/esn-3-" + 
@@ -188,7 +213,7 @@ public class AIMComputer implements SpaceSimulationObserver {
             //
             this.enemyesn.writeWeights(weights);
             this.enemyesncopy.writeWeights(weights);
-            */
+
             //
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -334,16 +359,18 @@ public class AIMComputer implements SpaceSimulationObserver {
         
     }
     public static void writeSequence(final String filepath,final double[] values) throws IOException {
-        File fout = new File("filepath");
-        FileOutputStream fos = new FileOutputStream(fout);
+        //File fout = new File(filepath);
+        //FileOutputStream fos = new FileOutputStream(filepath);
+        //BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(filepath,true));
 
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-
-        for (int i = 0; i < values.length; i++) {
-            String tempStr = String.valueOf(values[i]);
-            bw.write(tempStr);
-            bw.newLine();
+        String tempStr = "";
+        for (int i = 0; i < values.length -1; i++) {
+            tempStr += String.valueOf(values[i]) + " ";
         }
+        tempStr += String.valueOf(values[values.length -1]);
+        bw.append(tempStr);
+        bw.newLine();
 
         bw.close();
     }

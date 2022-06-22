@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import de.jannlab.io.Serializer;
 
 import static de.cogmod.rgnns.ReservoirTools.*;
 import static de.cogmod.rgnns.ReservoirTools.matrixAsString;
@@ -23,18 +24,19 @@ public class DELearningESN {
 
     public static void main(String[] args) {
 
-        final int reservoir_size = 30;
+        final int reservoirsize = 30;
         final double feedBackScaling = 1e-8;
-        //final double[][] W_input = new double[3][reservoir_size];
-        //final double[][] W_reservoir = new double[reservoir_size][reservoir_size];
-        final EchoStateNetwork esn = new EchoStateNetwork(3, reservoir_size, 3);
+        //final double[][] W_input = new double[3][reservoirsize];
+        //final double[][] W_reservoir = new double[reservoirsize][reservoirsize];
+        final EchoStateNetwork esn = new EchoStateNetwork(3, reservoirsize, 3);
+        esn.initializeWeights(new Random(1234), 0.1);
         int add_bias = 1;
 
         final Objective f = new Objective() {
             //
             @Override
             public int arity() {
-                return (reservoir_size + add_bias)*(reservoir_size + add_bias) + (3 + add_bias)*(reservoir_size + add_bias); // Add Bias
+                return (reservoirsize + add_bias)*(reservoirsize + add_bias) + (3 + add_bias)*(reservoirsize + add_bias); // Add Bias
             } // is W_reservoir + W_input
             @Override
             /**
@@ -42,31 +44,39 @@ public class DELearningESN {
              * optimizer to compute the "fitness" of a particular individual.
              */
             public double compute(double[] values, int offset) {
-                double[][] Sequence = new double[3][];//loadSequence("some/file");  // pointer auf weights
+                double[][] Sequence = null;
+                try {
+                    Sequence = loadSequence("data/Sequence.txt");  // pointer auf weights
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
                 int washout = 100;
-                int training = 1000;
-                int test = 100;
+                int training = 5000;
+                int test = 500;
 
-                //double[] inputWeights = Arrays.copyOfRange(values,offset,(reservoir_size+add_bias)*3);
-                //double[] reservoirWeights = Arrays.copyOfRange(values,offset,(reservoir_size+add_bias)*(reservoir_size+add_bias));
-
-                double [] optimizedWeights = Arrays.copyOfRange(values,offset,arity());
-                for (int i=0; i<(reservoir_size+add_bias)*3; i++){
-                    optimizedWeights[i] = optimizedWeights[i]*feedBackScaling;
+                // Get the best Weights of the Population. Values stores the weights for the whole population,
+                // the best starts at postion offset. There are arity many weights in every reservoir + Inputweights
+                double[] optimizedWeights = Arrays.copyOfRange(values, offset, offset + arity());
+                // The Inputweights get scaled by the OFB factor
+                for (int i = 0; i < (reservoirsize + add_bias) * 3; i++) {
+                    optimizedWeights[i] = optimizedWeights[i] * feedBackScaling;
                 }
 
+                // Read old Weights to copy the optimal SVD-calculated Outputweights from the training step
                 double[] oldWeights = new double[esn.getWeightsNum()];
                 double[] newWeights = new double[esn.getWeightsNum()];
                 esn.readWeights(oldWeights);
-                double[] Wout = Arrays.copyOfRange(oldWeights,arity(),esn.getWeightsNum());
+                double[] Wout = Arrays.copyOfRange(oldWeights, arity(), esn.getWeightsNum());
 
+                // Join the new optimized Reservoir + Inputweigths with the Outputweights and write to ESN
                 System.arraycopy(optimizedWeights, 0, newWeights, 0, optimizedWeights.length);
                 System.arraycopy(Wout, 0, newWeights, optimizedWeights.length, Wout.length);
                 esn.writeWeights(newWeights);  // flatten? Arrays.stream(W_reservoir).flatMapToInt(Arrays::stream).toArray();
 
-                double error =  esn.trainESN(Sequence,washout,training,test);
+                double error = esn.trainESN(Sequence, washout, training, test);
                 return error;
-            }
+            };
         };
         //
         // Now we setup the optimizer.
@@ -101,18 +111,16 @@ public class DELearningESN {
         //
         // read the best solution.
         //
-        final EchoStateNetwork esn_solution = new EchoStateNetwork(3, f.arity(), 3);
-        //optimizer.readBestSolution(esn_solution, 0);
-        //map(solution, 0, x);
-        //
-        // Print out solution. Note that least squares solution is:
-        // 0.68
-        // -0.07
-        // -0.10
-        // -0.05
-        // 0.69
-        //
-        System.out.println();
+        //final EchoStateNetwork esn_solution = new EchoStateNetwork(3, reservoirsize, 3);
+        double[] esn_solution_weights = new double[f.arity()];
+        optimizer.readBestSolution(esn_solution_weights, 0);
+        // write weights to file
+        try{
+            Serializer.write(esn_solution_weights, "data/esn-3-" + reservoirsize + "-3.weights");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("done");
     	
     }
 
