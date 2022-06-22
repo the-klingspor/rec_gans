@@ -50,7 +50,7 @@ public class DELearningESN {
             //
             @Override
             public int arity() {
-                return (reservoirsize + add_bias)*(reservoirsize) + (3 )*(reservoirsize + add_bias); // Add Bias
+                return (reservoirsize + add_bias)*(reservoirsize) + (3 +add_bias)*(reservoirsize); // Add Bias
             } // is W_reservoir + W_input
             @Override
             /**
@@ -72,7 +72,7 @@ public class DELearningESN {
                 // the best starts at postion offset. There are arity many weights in every reservoir + Inputweights
                 double[] optimizedWeights = Arrays.copyOfRange(values, offset, offset + arity());
                 // The Inputweights get scaled by the OFB factor
-                for (int i = 0; i < (reservoirsize + add_bias) * 3; i++) {
+                for (int i = 0; i < (reservoirsize ) * (3+ add_bias); i++) {
                     optimizedWeights[i] = optimizedWeights[i] * feedBackScaling;
                 }
 
@@ -132,7 +132,7 @@ public class DELearningESN {
         // calculate Wout
         //
         //
-        for (int i = 0; i < (reservoirsize + add_bias) * 3; i++) {
+        for (int i = 0; i < (reservoirsize ) * (3+ add_bias); i++) {
             esn_solution_weights[i] = esn_solution_weights[i] * feedBackScaling;
         }
         //
