@@ -148,6 +148,8 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         for (int step = 0; step < training; step++){
             double[] output = this.forwardPassOscillator();
             M[step] = this.getReservoirActivations();
+            // set Bias to 1 // useless
+            M[step][this.reservoirsize] = 1;
             this.teacherForcing(sequence[washout+step]);
         }
         // Calculate new Weight

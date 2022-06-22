@@ -125,7 +125,7 @@ public class AIMComputer implements SpaceSimulationObserver {
     @Override
     public void simulationStep(final SpaceSimulation sim) {
         //
-        boolean record = false;
+        boolean record = true;
         //
         synchronized (this) {
             //

@@ -45,7 +45,6 @@ public class DELearningESN {
         int test = 200;
 
 
-
         final Objective f = new Objective() {
             //
             @Override
