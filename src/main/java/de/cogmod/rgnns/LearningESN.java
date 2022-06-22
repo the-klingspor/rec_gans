@@ -15,16 +15,16 @@ public class LearningESN {
     public static void main(String[] args) {
 
         final double[][] sequence = {{1, 2}, {1, 2}};
-        final int washout = 10;
-        final int training = 10;
-        final int test = 0;
+        final int washout = 100;
+        final int training = 1000;
+        final int test = 500;
 
         final EchoStateNetwork esn = new EchoStateNetwork(1, 3, 1);
         esn.initializeWeights(new Random(1234), 0.1);
         //esn.trainESN(sequence,washout,training,test);
 
         try {
-            double[][] Seq = loadSequence("data/Sequence_recording.txt");
+            double[][] Seq = loadSequence("data/Sequence.txt");
 
             System.out.println(Seq.length);
         }

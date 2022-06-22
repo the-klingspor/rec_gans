@@ -33,15 +33,15 @@ public class DELearningESN {
         }
 
         final int reservoirsize = 30;
-        final double feedBackScaling = 1e-8;
+        final double feedBackScaling = 1e-9;
         //final double[][] W_input = new double[3][reservoirsize];
         //final double[][] W_reservoir = new double[reservoirsize][reservoirsize];
         final EchoStateNetwork esn = new EchoStateNetwork(3, reservoirsize, 3);
-        //esn.initializeWeights(new Random(1234), 0.1);
+        esn.initializeWeights(new Random(1234), 0.1);
         int add_bias = 1;
 
-        int washout = 100;
-        int training = 1000;
+        int washout = 300;
+        int training = 2000;
         int test = 200;
 
 

@@ -156,7 +156,6 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
 
         // Test Run
         double[][] M_test = new double[test][this.getLastInputLength()];
-        this.teacherForcing(sequence[washout+training]);
         for (int step = 0; step < test; step++){
             double[] output = this.forwardPassOscillator();
             M_test[step] = output;
