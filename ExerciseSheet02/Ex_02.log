@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.4.19)  30 MAY 2022 21:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/W32TeX) (preloaded format=pdflatex 2018.4.19)  2 JUN 2022 23:45
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1775,7 +1775,204 @@ brarypositioning.code.tex
 File: tikzlibrarypositioning.code.tex 2008/10/06 v3.0.1a (rcs-revision 1.7)
 )
 \c@@todonotes@numberoftodonotes=\count188
+)
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/biblatex.sty
+Package: biblatex 2017/12/19 v3.10 programmable bibliographies (PK/JW/AB)
+
+(c:/texlive/2017/texmf-dist/tex/latex/logreq/logreq.sty
+Package: logreq 2010/08/04 v1.0 xml request logger
+\lrq@indent=\count189
+
+(c:/texlive/2017/texmf-dist/tex/latex/logreq/logreq.def
+File: logreq.def 2010/08/04 v1.0 logreq spec v1.0
 ))
+\c@tabx@nest=\count190
+\c@listtotal=\count191
+\c@listcount=\count192
+\c@liststart=\count193
+\c@liststop=\count194
+\c@citecount=\count195
+\c@citetotal=\count196
+\c@multicitecount=\count197
+\c@multicitetotal=\count198
+\c@instcount=\count199
+Normal \count register pool exhausted, switching to extended pool.
+\c@maxnames=\count277
+\c@minnames=\count278
+\c@maxitems=\count279
+\c@minitems=\count280
+\c@citecounter=\count281
+\c@savedcitecounter=\count282
+\c@uniquelist=\count283
+\c@uniquename=\count284
+\c@refsection=\count285
+\c@refsegment=\count286
+\c@maxextratitle=\count287
+\c@maxextratitleyear=\count288
+\c@maxextradate=\count289
+\c@maxextraalpha=\count290
+\c@abbrvpenalty=\count291
+\c@highnamepenalty=\count292
+\c@lownamepenalty=\count293
+\c@maxparens=\count294
+\c@parenlevel=\count295
+\blx@tempcnta=\count296
+\blx@tempcntb=\count297
+\blx@tempcntc=\count298
+\blx@maxsection=\count299
+\blx@maxsegment@0=\count300
+\blx@notetype=\count301
+\blx@parenlevel@text=\count302
+\blx@parenlevel@foot=\count303
+\blx@sectionciteorder@0=\count304
+\labelnumberwidth=\skip71
+\labelalphawidth=\skip72
+\biblabelsep=\skip73
+\bibitemsep=\skip74
+\bibnamesep=\skip75
+\bibinitsep=\skip76
+\bibparsep=\skip77
+\bibhang=\skip78
+\blx@bcfin=\read4
+\blx@bcfout=\write7
+\c@mincomprange=\count305
+\c@maxcomprange=\count306
+\c@mincompwidth=\count307
+Package biblatex Info: Trying to load biblatex default data model...
+Package biblatex Info: ... file 'blx-dm.def' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/blx-dm.def)
+Package biblatex Info: Trying to load biblatex custom data model...
+Package biblatex Info: ... file 'biblatex-dm.cfg' not found.
+\c@afterword=\count308
+\c@savedafterword=\count309
+\c@annotator=\count310
+\c@savedannotator=\count311
+\c@author=\count312
+\c@savedauthor=\count313
+\c@bookauthor=\count314
+\c@savedbookauthor=\count315
+\c@commentator=\count316
+\c@savedcommentator=\count317
+\c@editor=\count318
+\c@savededitor=\count319
+\c@editora=\count320
+\c@savededitora=\count321
+\c@editorb=\count322
+\c@savededitorb=\count323
+\c@editorc=\count324
+\c@savededitorc=\count325
+\c@foreword=\count326
+\c@savedforeword=\count327
+\c@holder=\count328
+\c@savedholder=\count329
+\c@introduction=\count330
+\c@savedintroduction=\count331
+\c@namea=\count332
+\c@savednamea=\count333
+\c@nameb=\count334
+\c@savednameb=\count335
+\c@namec=\count336
+\c@savednamec=\count337
+\c@translator=\count338
+\c@savedtranslator=\count339
+\c@shortauthor=\count340
+\c@savedshortauthor=\count341
+\c@shorteditor=\count342
+\c@savedshorteditor=\count343
+\c@labelname=\count344
+\c@savedlabelname=\count345
+\c@institution=\count346
+\c@savedinstitution=\count347
+\c@lista=\count348
+\c@savedlista=\count349
+\c@listb=\count350
+\c@savedlistb=\count351
+\c@listc=\count352
+\c@savedlistc=\count353
+\c@listd=\count354
+\c@savedlistd=\count355
+\c@liste=\count356
+\c@savedliste=\count357
+\c@listf=\count358
+\c@savedlistf=\count359
+\c@location=\count360
+\c@savedlocation=\count361
+\c@organization=\count362
+\c@savedorganization=\count363
+\c@origlocation=\count364
+\c@savedoriglocation=\count365
+\c@origpublisher=\count366
+\c@savedorigpublisher=\count367
+\c@publisher=\count368
+\c@savedpublisher=\count369
+\c@language=\count370
+\c@savedlanguage=\count371
+\c@origlanguage=\count372
+\c@savedoriglanguage=\count373
+\c@pageref=\count374
+\c@savedpageref=\count375
+\shorthandwidth=\skip79
+\shortjournalwidth=\skip80
+\shortserieswidth=\skip81
+\shorttitlewidth=\skip82
+\shortauthorwidth=\skip83
+\shorteditorwidth=\skip84
+Package biblatex Info: Trying to load compatibility code...
+Package biblatex Info: ... file 'blx-compat.def' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/blx-compat.def
+File: blx-compat.def 2017/12/19 v3.10 biblatex compatibility (PK/JW/AB)
+)
+Package biblatex Info: Trying to load generic definitions...
+Package biblatex Info: ... file 'biblatex.def' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/biblatex.def
+File: biblatex.def 2017/12/19 v3.10 biblatex compatibility (PK/JW/AB)
+\c@textcitecount=\count376
+\c@textcitetotal=\count377
+\c@textcitemaxnames=\count378
+\c@biburlnumpenalty=\count379
+\c@biburlucpenalty=\count380
+\c@biburllcpenalty=\count381
+\c@smartand=\count382
+)
+Package biblatex Info: Trying to load bibliography style 'numeric'...
+Package biblatex Info: ... file 'numeric.bbx' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/bbx/numeric.bbx
+File: numeric.bbx 2017/12/19 v3.10 biblatex bibliography style (PK/JW/AB)
+Package biblatex Info: Trying to load bibliography style 'standard'...
+Package biblatex Info: ... file 'standard.bbx' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/bbx/standard.bbx
+File: standard.bbx 2017/12/19 v3.10 biblatex bibliography style (PK/JW/AB)
+\c@bbx:relatedcount=\count383
+\c@bbx:relatedtotal=\count384
+))
+Package biblatex Info: Trying to load citation style 'numeric'...
+Package biblatex Info: ... file 'numeric.cbx' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/cbx/numeric.cbx
+File: numeric.cbx 2017/12/19 v3.10 biblatex citation style (PK/JW/AB)
+Package biblatex Info: Redefining '\cite'.
+Package biblatex Info: Redefining '\parencite'.
+Package biblatex Info: Redefining '\footcite'.
+Package biblatex Info: Redefining '\footcitetext'.
+Package biblatex Info: Redefining '\smartcite'.
+Package biblatex Info: Redefining '\supercite'.
+Package biblatex Info: Redefining '\textcite'.
+Package biblatex Info: Redefining '\textcites'.
+Package biblatex Info: Redefining '\cites'.
+Package biblatex Info: Redefining '\parencites'.
+Package biblatex Info: Redefining '\smartcites'.
+)
+Package biblatex Info: Trying to load configuration file...
+Package biblatex Info: ... file 'biblatex.cfg' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/biblatex.cfg
+File: biblatex.cfg 
+)))
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... found 'babel' package.
 Package csquotes Info: Adjusting default style.
@@ -1785,7 +1982,12 @@ _02.aex <nul: /p x=^%~$PATH:i>> Ex_02.aex)...executed.
 
 runsystem(del Ex_02.aex)...executed.
 
- (./Ex_02.aux)
+Package biblatex Info: Trying to load language 'english'...
+Package biblatex Info: ... file 'english.lbx' found.
+
+(c:/texlive/2017/texmf-dist/tex/latex/biblatex/lbx/english.lbx
+File: english.lbx 2017/12/19 v3.10 biblatex localization (PK/JW/AB)
+) (./Ex_02.aux)
 \openout1 = `Ex_02.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 8.
@@ -1855,16 +2057,16 @@ LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/m/n' will be
 
 (c:/texlive/2017/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count189
+\scratchcounter=\count385
 \scratchdimen=\dimen274
 \scratchbox=\box77
-\nofMPsegments=\count190
-\nofMParguments=\count191
+\nofMPsegments=\count386
+\nofMParguments=\count387
 \everyMPshowfont=\toks46
-\MPscratchCnt=\count192
+\MPscratchCnt=\count388
 \MPscratchDim=\dimen275
-\MPnumerator=\count193
-\makeMPintoPDFobject=\count194
+\MPnumerator=\count389
+\makeMPintoPDFobject=\count390
 \everyMPtoPDFconversion=\toks47
 ) (c:/texlive/2017/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
@@ -1952,16 +2154,26 @@ Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 (c:/texlive/2017/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
-\c@section@level=\count195
+\c@section@level=\count391
 )
 LaTeX Info: Redefining \ref on input line 8.
 LaTeX Info: Redefining \pageref on input line 8.
 LaTeX Info: Redefining \nameref on input line 8.
 
 (./Ex_02.out) (./Ex_02.out)
-\@outlinefile=\write7
-\openout7 = `Ex_02.out'.
+\@outlinefile=\write8
+\openout8 = `Ex_02.out'.
 
+Package biblatex Info: Input encoding 'utf8' detected.
+Package biblatex Info: Automatic encoding selection.
+(biblatex)             Assuming data encoding 'utf8'.
+\openout7 = `Ex_02.bcf'.
+
+Package biblatex Info: Trying to load bibliographic data...
+Package biblatex Info: ... file 'Ex_02.bbl' found.
+ (./Ex_02.bbl)
+Package biblatex Info: Reference section=0 on input line 8.
+Package biblatex Info: Reference segment=0 on input line 8.
 
 (c:/texlive/2017/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman 
@@ -2018,67 +2230,69 @@ LaTeX Font Warning: Font shape `U/wasy/m/n' in size <5.5> not available
 
 LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/b/n' will be
 (Font)              scaled to size 10.0pt on input line 12.
-Package hyperref Info: bookmark level for unknown todo defaults to 0 on input l
-ine 23.
-
-LaTeX Warning: Marginpar on page 1 moved.
-
-
-Overfull \hbox (4.84364pt too wide) in paragraph at lines 67--67
-\T1/SourceSansPro-LF/m/n/10 (-20) parametrisierung 
- []
-
-
-Overfull \hbox (4.84364pt too wide) in paragraph at lines 67--67
-\T1/SourceSansPro-LF/m/n/10 (-20) parametrisierung 
- []
-
-
-Overfull \hbox (4.84364pt too wide) in paragraph at lines 67--67
-\T1/SourceSansPro-LF/m/n/10 (-20) parametrisierung 
- []
-
-
-Overfull \hbox (4.84364pt too wide) in paragraph at lines 67--67
-\T1/SourceSansPro-LF/m/n/10 (-20) parametrisierung 
- []
-
-
-LaTeX Warning: Marginpar on page 1 moved.
-
 LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/m/n' will be
-(Font)              scaled to size 8.0pt on input line 71.
+(Font)              scaled to size 8.0pt on input line 52.
 [1{c:/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
-]
+] [2]
+LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/m/n' will be
+(Font)              scaled to size 7.3pt on input line 101.
+LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/m/n' will be
+(Font)              scaled to size 5.5pt on input line 101.
+<belkin19.png, id=48, 1284.8pt x 292.09125pt>
+File: belkin19.png Graphic file (type png)
+<use belkin19.png>
+Package pdftex.def Info: belkin19.png  used on input line 123.
+(pdftex.def)             Requested size: 375.57787pt x 85.3862pt.
+ [3]
+[4pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) 
+has been already used, duplicate ignored
 
-LaTeX Warning: Marginpar on page 2 moved.
+\@EveryShipout@Output ...@Org@Shipout \box \@cclv 
+                                                  
+l.166 
+       <./belkin19.png>]
+<ae.png, id=70, 509.33144pt x 230.14554pt>
+File: ae.png Graphic file (type png)
+<use ae.png>
+Package pdftex.def Info: ae.png  used on input line 169.
+(pdftex.def)             Requested size: 375.57787pt x 169.71155pt.
+ [5pdfTeX warning (ext4): destination with the same identifier (name{figure.2})
+ has been already used, duplicate ignored
 
+\@EveryShipout@Output ...@Org@Shipout \box \@cclv 
+                                                  
+l.210 \end{align}
+                  <./ae.png>] [6] [7]
+<gan.png, id=113, 772.17053pt x 252.08464pt>
+File: gan.png Graphic file (type png)
+<use gan.png>
+Package pdftex.def Info: gan.png  used on input line 313.
+(pdftex.def)             Requested size: 375.57787pt x 122.61093pt.
+ [8pdfTeX warning (ext4): destination with the same identifier (name{figure.3})
+ has been already used, duplicate ignored
 
-LaTeX Warning: Marginpar on page 2 moved.
+\@EveryShipout@Output ...@Org@Shipout \box \@cclv 
+                                                  
+l.332 
+       <./gan.png>]
+LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/b/n' will be
+(Font)              scaled to size 14.4pt on input line 335.
+LaTeX Font Info:    Font shape `T1/SourceSansPro-LF/m/it' will be
+(Font)              scaled to size 10.0pt on input line 335.
 
+Overfull \hbox (22.56465pt too wide) in paragraph at lines 336--336
+[]\T1/SourceSansPro-LF/m/n/10 (-20) Andreas Geiger. \T1/SourceSansPro-LF/m/it/1
+0 (-20) Lec-ture: Deep Learn-ing\T1/SourceSansPro-LF/m/n/10 (-20) . https://uni
+-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-
+ []
 
-LaTeX Warning: Marginpar on page 2 moved.
-
-
-LaTeX Warning: Marginpar on page 2 moved.
-
-
-LaTeX Warning: Marginpar on page 2 moved.
-
-
-LaTeX Warning: Marginpar on page 2 moved.
-
-[2]
-
-LaTeX Warning: Marginpar on page 3 moved.
-
-[3]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 147.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 147.
+[9]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 337.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 337.
  (./Ex_02.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 147.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 147.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 337.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 337.
 Package rerunfilecheck Info: File `Ex_02.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 
@@ -2086,32 +2300,42 @@ Package rerunfilecheck Info: File `Ex_02.out' has not changed.
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.5pt have occurred.
 
+Package logreq Info: Writing requests to 'Ex_02.run.xml'.
+\openout1 = `Ex_02.run.xml'.
+
  ) 
 Here is how much of TeX's memory you used:
- 30016 strings out of 494830
- 560789 string characters out of 6177580
- 867267 words of memory out of 5000000
- 32620 multiletter control sequences out of 15000+600000
- 79233 words of font info for 164 fonts, out of 8000000 for 9000
+ 35976 strings out of 494830
+ 674067 string characters out of 6177580
+ 1261054 words of memory out of 5000000
+ 38424 multiletter control sequences out of 15000+600000
+ 123163 words of font info for 216 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 66i,11n,95p,8873b,764s stack positions out of 5000i,500n,10000p,200000b,80000s
-{c:/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}{c:/texlive/2017/texm
-f-dist/fonts/enc/dvips/sourcesanspro/a_ggs4wk.enc}<c:/texlive/2017/texmf-dist/f
-onts/type1/adobe/sourcesanspro/SourceSansPro-Bold.pfb><c:/texlive/2017/texmf-di
-st/fonts/type1/adobe/sourcesanspro/SourceSansPro-Regular.pfb><c:/texlive/2017/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmb10.pfb><c:/texlive/2017/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2017/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr7.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/ne
-wtx/rntxmi7.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/txfonts/rtxmi.pf
-b><c:/texlive/2017/texmf-dist/fonts/type1/public/newtx/rtxmi7.pfb><c:/texlive/2
-017/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb><c:/texlive/2017/texmf-dist/
-fonts/type1/public/newtx/txexs.pfb><c:/texlive/2017/texmf-dist/fonts/type1/publ
-ic/newtx/txsys.pfb><c:/texlive/2017/texmf-dist/fonts/type1/urw/times/utmri8a.pf
-b>
-Output written on Ex_02.pdf (3 pages, 168667 bytes).
+ 66i,16n,95p,8873b,1680s stack positions out of 5000i,500n,10000p,200000b,80000s
+{c:/texlive/2017/texmf-dist/fonts/enc/dvips/sourcesanspro/a_5tbsmu.enc}{c:/te
+xlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}{c:/texlive/2017/texmf-dist/f
+onts/enc/dvips/sourcesanspro/a_ggs4wk.enc}<c:/texlive/2017/texmf-dist/fonts/typ
+e1/adobe/sourcesanspro/SourceSansPro-Bold.pfb><c:/texlive/2017/texmf-dist/fonts
+/type1/adobe/sourcesanspro/SourceSansPro-It.pfb><c:/texlive/2017/texmf-dist/fon
+ts/type1/adobe/sourcesanspro/SourceSansPro-Regular.pfb><c:/texlive/2017/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmb10.pfb><c:/texlive/2017/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2017/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmr5.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmr7.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/newtx/rntxmi.pfb><c
+:/texlive/2017/texmf-dist/fonts/type1/public/newtx/rntxmi5.pfb><c:/texlive/2017
+/texmf-dist/fonts/type1/public/newtx/rntxmi7.pfb><c:/texlive/2017/texmf-dist/fo
+nts/type1/public/txfonts/rtxmi.pfb><c:/texlive/2017/texmf-dist/fonts/type1/publ
+ic/newtx/rtxmi5.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/newtx/rtxmi7
+.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/txfonts/rtxr.pfb><c:/texliv
+e/2017/texmf-dist/fonts/type1/public/newtx/txexs.pfb><c:/texlive/2017/texmf-dis
+t/fonts/type1/public/txfonts/txmia.pfb><c:/texlive/2017/texmf-dist/fonts/type1/
+public/txfonts/txsyb.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/txfonts
+/txsyc.pfb><c:/texlive/2017/texmf-dist/fonts/type1/public/newtx/txsys.pfb><c:/t
+exlive/2017/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Ex_02.pdf (9 pages, 401919 bytes).
 PDF statistics:
- 95 PDF objects out of 1000 (max. 8388607)
- 77 compressed objects within 1 object stream
- 21 named destinations out of 1000 (max. 500000)
- 16909 words of extra memory for PDF output out of 17280 (max. 10000000)
+ 213 PDF objects out of 1000 (max. 8388607)
+ 171 compressed objects within 2 object streams
+ 59 named destinations out of 1000 (max. 500000)
+ 22556 words of extra memory for PDF output out of 24883 (max. 10000000)
 
