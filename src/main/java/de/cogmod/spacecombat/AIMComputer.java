@@ -78,7 +78,7 @@ public class AIMComputer implements SpaceSimulationObserver {
         for (int t=0; t<timesteps; t++){
             pred[t] = this.enemyesncopy.forwardPassOscillator();
         }
-
+        //
         Vector3d last           = this.enemy.getRelativePosition();
         final Vector3d dir      = new Vector3d();
         final Vector3d[] result = new Vector3d[timesteps];
