@@ -3,6 +3,7 @@ package de.cogmod.spacecombat;
 
 import java.io.*;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
 import de.cogmod.rgnns.EchoStateNetwork;
@@ -83,15 +84,9 @@ public class AIMComputer implements SpaceSimulationObserver {
         final Vector3d[] result = new Vector3d[timesteps];
         //
         for (int t = 0; t < timesteps; t++) {
-            dir.x = pred[0];
-            dir.y = pred[1];
-            dir.z = pred[2];
-            //
-            Vector3d.normalize(dir, dir);
-            //
-            dir.x *= 1.0;
-            dir.y *= 1.0;
-            dir.z *= 1.0;
+            dir.x = pred[t][0];
+            dir.y = pred[t][1];
+            dir.z = pred[t][2];
 
             final Vector3d current = Vector3d.add(last, dir);
             result[t] = Vector3d.add(current, enemy.getOrigin());
@@ -130,7 +125,7 @@ public class AIMComputer implements SpaceSimulationObserver {
     @Override
     public void simulationStep(final SpaceSimulation sim) {
         //
-        boolean record = true;
+        boolean record = false;
         //
         synchronized (this) {
             //
@@ -197,7 +192,7 @@ public class AIMComputer implements SpaceSimulationObserver {
             //
             // load esn.
             //
-            final int reservoirsize = 1; // use reasonable value here.
+            final int reservoirsize = 30; // use reasonable value here.
             this.enemyesn     = new EchoStateNetwork(3, reservoirsize, 3);
             this.enemyesncopy = new EchoStateNetwork(3, reservoirsize, 3);
             //
@@ -212,6 +207,7 @@ public class AIMComputer implements SpaceSimulationObserver {
             final double[] weights = Serializer.read(esnweightsfile);
             //
             this.enemyesn.writeWeights(weights);
+
             this.enemyesncopy.writeWeights(weights);
 
             //

@@ -475,6 +475,11 @@ public class RecurrentNeuralNetwork {
                     for (int i = 0; i < wll.length; i++) {
                         for (int j = 0; j < wll[i].length; j++) {
                             wll[i][j] = from[idx++];
+                            /* // for debugging
+                            if(idx == 1084){
+                                System.out.println("hi");
+                            }
+                            */
                         }
                     }
                 }

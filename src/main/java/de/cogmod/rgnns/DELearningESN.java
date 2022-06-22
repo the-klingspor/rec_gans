@@ -24,6 +24,14 @@ public class DELearningESN {
 
     public static void main(String[] args) {
 
+        double[][] Sequence = null;
+        try {
+            Sequence = loadSequence("data/Sequence.txt");  // pointer auf weights
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+
         final int reservoirsize = 30;
         final double feedBackScaling = 1e-8;
         //final double[][] W_input = new double[3][reservoirsize];
@@ -31,6 +39,12 @@ public class DELearningESN {
         final EchoStateNetwork esn = new EchoStateNetwork(3, reservoirsize, 3);
         esn.initializeWeights(new Random(1234), 0.1);
         int add_bias = 1;
+
+        int washout = 100;
+        int training = 5000;
+        int test = 500;
+
+
 
         final Objective f = new Objective() {
             //
@@ -44,6 +58,8 @@ public class DELearningESN {
              * optimizer to compute the "fitness" of a particular individual.
              */
             public double compute(double[] values, int offset) {
+
+                // get an error if I don't include Sequence loading here, but should already be loaded in main
                 double[][] Sequence = null;
                 try {
                     Sequence = loadSequence("data/Sequence.txt");  // pointer auf weights
@@ -51,9 +67,6 @@ public class DELearningESN {
                 catch (IOException e) {
                     e.printStackTrace();
                 }
-                int washout = 100;
-                int training = 5000;
-                int test = 500;
 
                 // Get the best Weights of the Population. Values stores the weights for the whole population,
                 // the best starts at postion offset. There are arity many weights in every reservoir + Inputweights
@@ -70,6 +83,7 @@ public class DELearningESN {
                 double[] Wout = Arrays.copyOfRange(oldWeights, arity(), esn.getWeightsNum());
 
                 // Join the new optimized Reservoir + Inputweigths with the Outputweights and write to ESN
+                // arraycopy: src array, src pos, dest arry, dest pos
                 System.arraycopy(optimizedWeights, 0, newWeights, 0, optimizedWeights.length);
                 System.arraycopy(Wout, 0, newWeights, optimizedWeights.length, Wout.length);
                 esn.writeWeights(newWeights);  // flatten? Arrays.stream(W_reservoir).flatMapToInt(Arrays::stream).toArray();
@@ -114,9 +128,33 @@ public class DELearningESN {
         //final EchoStateNetwork esn_solution = new EchoStateNetwork(3, reservoirsize, 3);
         double[] esn_solution_weights = new double[f.arity()];
         optimizer.readBestSolution(esn_solution_weights, 0);
+        //
+        // calculate Wout
+        //
+        //
+        for (int i = 0; i < (reservoirsize + add_bias) * 3; i++) {
+            esn_solution_weights[i] = esn_solution_weights[i] * feedBackScaling;
+        }
+        //
+        double[] oldWeights = new double[esn.getWeightsNum()];
+        double[] newWeights = new double[esn.getWeightsNum()];
+        esn.readWeights(oldWeights);
+        double[] Wout = Arrays.copyOfRange(oldWeights, f.arity(), esn.getWeightsNum());
+        //
+        System.arraycopy(esn_solution_weights, 0, newWeights, 0, esn_solution_weights.length);
+        System.arraycopy(Wout, 0, newWeights, esn_solution_weights.length, Wout.length);
+        esn.writeWeights(newWeights);  // flatten? Arrays.stream(W_reservoir).flatMapToInt(Arrays::stream).toArray();
+        double error = esn.trainESN(Sequence, washout, training, test);
+        //
+        //get Wout again
+        //
+        double[] finalWeights = new double[esn.getWeightsNum()];
+        esn.readWeights(finalWeights);
+        //
         // write weights to file
+        //
         try{
-            Serializer.write(esn_solution_weights, "data/esn-3-" + reservoirsize + "-3.weights");
+            Serializer.write(finalWeights, "data/esn-3-" + reservoirsize + "-3.weights");
         } catch (IOException e) {
             e.printStackTrace();
         }
