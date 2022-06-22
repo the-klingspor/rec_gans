@@ -130,6 +130,7 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         final int training,
         final int test
     ) {
+        int add_bias = 0;
         double[][] train_seq = Arrays.copyOfRange(sequence,washout,washout+training);
         double[][] test_seq = Arrays.copyOfRange(sequence,washout+training,washout+training+test);
 
@@ -143,7 +144,7 @@ public class EchoStateNetwork extends RecurrentNeuralNetwork {
         }
 
         // Training Run
-        double[][] M = new double[training][this.reservoirsize + 1]; // +1 für Bias oder nicht
+        double[][] M = new double[training][this.reservoirsize + add_bias]; // +1 für Bias oder nicht
         for (int step = 0; step < training; step++){
             double[] output = this.forwardPassOscillator();
             M[step] = this.getReservoirActivations();

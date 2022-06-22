@@ -37,12 +37,12 @@ public class DELearningESN {
         //final double[][] W_input = new double[3][reservoirsize];
         //final double[][] W_reservoir = new double[reservoirsize][reservoirsize];
         final EchoStateNetwork esn = new EchoStateNetwork(3, reservoirsize, 3);
-        esn.initializeWeights(new Random(1234), 0.1);
+        //esn.initializeWeights(new Random(1234), 0.1);
         int add_bias = 1;
 
         int washout = 100;
-        int training = 5000;
-        int test = 500;
+        int training = 1000;
+        int test = 200;
 
 
 
@@ -50,7 +50,7 @@ public class DELearningESN {
             //
             @Override
             public int arity() {
-                return (reservoirsize + add_bias)*(reservoirsize + add_bias) + (3 + add_bias)*(reservoirsize + add_bias); // Add Bias
+                return (reservoirsize + add_bias)*(reservoirsize) + (3 )*(reservoirsize + add_bias); // Add Bias
             } // is W_reservoir + W_input
             @Override
             /**
