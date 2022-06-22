@@ -32,7 +32,7 @@ public class DELearningESN {
             e.printStackTrace();
         }
 
-        final int reservoirsize = 30;
+        final int reservoirsize = 60;
         final double feedBackScaling = 1e-8;
         //final double[][] W_input = new double[3][reservoirsize];
         //final double[][] W_reservoir = new double[reservoirsize][reservoirsize];
@@ -40,9 +40,9 @@ public class DELearningESN {
         //esn.initializeWeights(new Random(1234), 0.1);
         int add_bias = 1;
 
-        int washout = 1000;
-        int training = 1700;
-        int test = 1000;
+        int washout = 100;
+        int training = 1000;
+        int test = 100;
 
 
 
@@ -121,7 +121,7 @@ public class DELearningESN {
         //
         // go!
         //
-        optimizer.iterate(1000, 0.0);
+        optimizer.iterate(10000, 0.0);
         //
         // read the best solution.
         //

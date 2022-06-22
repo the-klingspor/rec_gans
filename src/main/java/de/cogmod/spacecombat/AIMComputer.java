@@ -152,12 +152,23 @@ public class AIMComputer implements SpaceSimulationObserver {
                 }
             }
             else {
-                this.enemyesn.forwardPassOscillator();
+                double[] output  = this.enemyesn.forwardPassOscillator();
                 this.enemyesn.teacherForcing(update);
-                //this.enemyesncopy = new EchoStateNetwork(3, this.enemyesn.reservoirsize, 3);
-                //double[] weights = new double[this.enemyesn.getWeightsNum()];
-                //this.enemyesn.readWeights(weights);
-                //this.enemyesncopy.writeWeights(weights);
+                this.enemyesncopy = new EchoStateNetwork(3, this.enemyesn.reservoirsize, 3);
+                double[] weights = new double[this.enemyesn.getWeightsNum()];
+                this.enemyesn.readWeights(weights);
+                this.enemyesncopy.writeWeights(weights);
+                /*
+                double[][][] enemyAct = this.enemyesn.getAct();
+                double[][][] enemyCopyAct = this.enemyesncopy.getAct();
+                for (int i=0; i<enemyAct.length;i++){
+                    for (int j=0; j<enemyAct[i].length;j++){
+                        for (int k=0; k<enemyAct[i][j].length;k++){
+                            enemyCopyAct[i][j][k] = enemyAct[i][j][k];
+                        }
+                    }
+                }
+                */
                 this.enemyesncopy.forwardPassOscillator();
                 this.enemyesncopy.teacherForcing(update);
             }
