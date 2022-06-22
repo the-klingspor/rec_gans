@@ -40,9 +40,9 @@ public class DELearningESN {
         //esn.initializeWeights(new Random(1234), 0.1);
         int add_bias = 1;
 
-        int washout = 100;
-        int training = 1000;
-        int test = 200;
+        int washout = 1000;
+        int training = 1700;
+        int test = 1000;
 
 
 
