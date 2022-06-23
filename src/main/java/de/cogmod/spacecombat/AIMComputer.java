@@ -77,6 +77,11 @@ public class AIMComputer implements SpaceSimulationObserver {
         double[][] pred = new double [timesteps][3];
         for (int t=0; t<timesteps; t++){
             pred[t] = this.enemyesncopy.forwardPassOscillator();
+/*
+            pred[t][0] = pred[t][0] * 1e-1;
+            pred[t][1] = pred[t][1] * 1e-1;
+            pred[t][2] = pred[t][2] * 1e-1;
+*/
         }
         //
         Vector3d last           = this.enemy.getRelativePosition();
@@ -84,13 +89,13 @@ public class AIMComputer implements SpaceSimulationObserver {
         final Vector3d[] result = new Vector3d[timesteps];
         //
         for (int t = 0; t < timesteps; t++) {
-            dir.x = pred[t][0];
+            dir.x = pred[t][0] ;
             dir.y = pred[t][1];
             dir.z = pred[t][2];
 
-            final Vector3d current = Vector3d.add(last, dir);
-            result[t] = Vector3d.add(current, enemy.getOrigin());
-            last = current;
+            //final Vector3d current = Vector3d.add(last, dir);
+            result[t] = Vector3d.add(dir, enemy.getOrigin());
+            //last = current;
         }
         return result;
     }
@@ -125,7 +130,7 @@ public class AIMComputer implements SpaceSimulationObserver {
     @Override
     public void simulationStep(final SpaceSimulation sim) {
         //
-        boolean record = true;
+        boolean record = false;
         //
         synchronized (this) {
             //
@@ -154,11 +159,12 @@ public class AIMComputer implements SpaceSimulationObserver {
             else {
                 double[] output  = this.enemyesn.forwardPassOscillator();
                 this.enemyesn.teacherForcing(update);
+
                 this.enemyesncopy = new EchoStateNetwork(3, this.enemyesn.reservoirsize, 3);
                 double[] weights = new double[this.enemyesn.getWeightsNum()];
                 this.enemyesn.readWeights(weights);
                 this.enemyesncopy.writeWeights(weights);
-                /*
+
                 double[][][] enemyAct = this.enemyesn.getAct();
                 double[][][] enemyCopyAct = this.enemyesncopy.getAct();
                 for (int i=0; i<enemyAct.length;i++){
@@ -168,9 +174,9 @@ public class AIMComputer implements SpaceSimulationObserver {
                         }
                     }
                 }
-                */
-                this.enemyesncopy.forwardPassOscillator();
-                this.enemyesncopy.teacherForcing(update);
+
+                //this.enemyesncopy.forwardPassOscillator();
+                //this.enemyesncopy.teacherForcing(update);
             }
             
             //
@@ -205,7 +211,7 @@ public class AIMComputer implements SpaceSimulationObserver {
             //
             // load esn.
             //
-            final int reservoirsize = 30; // use reasonable value here.
+            final int reservoirsize = 60; // use reasonable value here.
             this.enemyesn     = new EchoStateNetwork(3, reservoirsize, 3);
             this.enemyesncopy = new EchoStateNetwork(3, reservoirsize, 3);
             //

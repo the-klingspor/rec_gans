@@ -26,14 +26,14 @@ public class DELearningESN {
 
         double[][] Sequence = null;
         try {
-            Sequence = loadSequence("data/Sequence.txt");  // pointer auf weights
+            Sequence = loadSequence("data/Sequence_long.txt");  // pointer auf weights
         }
         catch (IOException e) {
             e.printStackTrace();
         }
 
         final int reservoirsize = 60;
-        final double feedBackScaling = 1e-8;
+        final double feedBackScaling = 1e-10;
         //final double[][] W_input = new double[3][reservoirsize];
         //final double[][] W_reservoir = new double[reservoirsize][reservoirsize];
         final EchoStateNetwork esn = new EchoStateNetwork(3, reservoirsize, 3);
@@ -41,7 +41,7 @@ public class DELearningESN {
         int add_bias = 1;
 
         int washout = 100;
-        int training = 1000;
+        int training = 500;
         int test = 100;
 
 
@@ -121,7 +121,7 @@ public class DELearningESN {
         //
         // go!
         //
-        optimizer.iterate(10000, 0.0);
+        optimizer.iterate(1500, 0.0);
         //
         // read the best solution.
         //
