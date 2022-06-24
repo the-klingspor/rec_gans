@@ -9,11 +9,8 @@ This script was inspired by
 https://stanford.edu/~shervine/blog/pytorch-how-to-generate-data-parallel
 """
 
-import unittest
 import torch as th
 import numpy as np
-import netCDF4 as nc
-import xarray as xr
 import os
 import glob
 

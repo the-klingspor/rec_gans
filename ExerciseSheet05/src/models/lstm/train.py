@@ -96,8 +96,11 @@ def run_training():
             # Reset optimizer to clear the previous batch
             optimizer.zero_grad()
 
-            # TODO: Generate a model prediction 
-            loss = criterion(y_hat, target)
+            y_hat, _ = model(net_input)
+            target = net_label
+            #print("pred: ", y_hat[0])
+            #print("target: ", target[0])
+            loss = criterion(y_hat.squeeze(), target.squeeze())
 
             # Compute gradients
             loss.backward()
@@ -106,6 +109,7 @@ def run_training():
             optimizer.step()
 
             sequence_errors.append(loss.item())
+            #print(loss)
 
         epoch_errors.append(np.mean(sequence_errors))
 
@@ -116,7 +120,7 @@ def run_training():
                 model_src_path=os.path.abspath(""),
                 cfg=cfg,
                 epoch=epoch,
-                epoch_errors=epoch_errors,
+                epoch_errors_train=epoch_errors,
                 model=model))
             thread.start()
 

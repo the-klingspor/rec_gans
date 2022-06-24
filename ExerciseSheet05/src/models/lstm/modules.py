@@ -27,8 +27,9 @@ class Model(nn.Module):
 		"""
 		super().__init__()
 
-		# TODO: Set up a linear input linear layer, two lstm layers, and an
-		#		output linear layer here
+		self.input = nn.Linear(d_one_hot, d_lstm, bias=bias)
+		self.lstm = nn.LSTM(d_lstm, d_lstm, num_lstm_layers, bias=bias, dropout=dropout)
+		self.output = nn.Linear(d_lstm, d_one_hot)
 
 	def forward(self, x, state=None):
 		"""
@@ -37,7 +38,8 @@ class Model(nn.Module):
 		:return: The module's output
 		"""
 
-		# TODO: Implement the forward pass and return the model's output as
-		#		well as the hidden and cell states of the lstms.
+		x = self.input(x)
+		x, (h, c) = self.lstm(x)
+		x = self.output(x)
 
 		return x, (h, c)

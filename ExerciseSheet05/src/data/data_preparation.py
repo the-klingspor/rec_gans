@@ -31,7 +31,7 @@ def txt_to_npy(path):
 	"""
 
 	# Load the .txt file
-	with open(path, "r") as file:
+	with open(path, "r", encoding='utf-8') as file:
 
 		#
 		# Determine the alphabet of the text
@@ -65,21 +65,27 @@ def txt_to_npy(path):
 			if len(line) <= 1:
 				continue
 
-			# TODO: Convert the line into a sequence of one hot vectors and
-			#		write it to file as sample_****.npy, using np.save as
-			#		above. You may implement and use a char_to_one_hot method
-			#		in the helper_functions.py (utils directory).
-
+			# Convert the line into a sequence of one hot vectors and
+			# write it to file as sample_****.npy, using np.save as above.
 			data_idx += 1
 
+			sample = []
+			for ch in line:
+				sample.append(helpers.char_to_one_hot(ch, alphabet))
+
+			sample_ar = np.array(sample)
+			sample_name = os.path.join(DATASET_NAME, f"sample_{data_idx}")
+			np.save(sample_name, sample_ar)
 
 ##########
 # SCRIPT #
 ##########
 
+
 def main():
 	os.makedirs(DATASET_NAME, exist_ok=True)
 	txt_to_npy("text.txt")
+
 
 if __name__ == "__main__":
 	main()
