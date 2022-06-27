@@ -106,7 +106,8 @@ def run_training():
             # Reset optimizer to clear the previous batch
             optimizer.zero_grad()
 
-            # TODO: Generate prediction
+            # Generate prediction
+            y_hat = model(net_input)  # todo
 
             # Convert target one hot to indices (required for CE-loss)
             target = net_label[:, 0].data.topk(1)[1][:, 0]
@@ -119,7 +120,6 @@ def run_training():
         #After each epoch, use the LR-scheduler if it is set
         if cfg.training.scheduler == True:
             scheduler.step()
-
 
         epoch_errors_train.append(np.mean(sequence_errors))
 

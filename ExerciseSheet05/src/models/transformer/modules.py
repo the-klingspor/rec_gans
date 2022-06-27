@@ -56,9 +56,14 @@ class MultiHeadSelfAttention(nn.Module):
 		"""
 		super().__init__()
 
-		# TODO: set up the layers for the multi-head-attention module here
-		n_k, n_v, n_q, n_out = d_model
+		# set up the layers for the multi-head-attention module here
+		# n_k, n_v, n_q, n_out = d_model ? todo: sizes
+		self.K = th.empty((n_heads, d_model, d_model), requires_grad=True)
+		self.V = th.empty((n_heads, d_model, d_model), requires_grad=True)
+		self.Q = th.empty((n_heads, d_model, d_model), requires_grad=True)
 
+		self.dropout = nn.Dropout(dropout)
+		self.output = th.empty((n_heads * d_model), requires_grad=True)
 
 	def forward(self, x, mask=None):
 		"""
@@ -143,7 +148,8 @@ class Model(nn.Module):
 		"""
 		super().__init__()
 
-		# TODO: define linear and decoder layers for the overall model
+		# define linear and decoder layers for the overall model
+		attention_layers = [MultiHeadSelfAttention(n_head, d_model)
 
 	def forward(self, x):
 		"""
