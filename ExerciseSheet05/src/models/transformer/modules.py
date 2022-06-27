@@ -14,7 +14,7 @@ class FeedForward(nn.Module):
 	dropout and a linear layer.
 	"""
 
-	def __init__(self, d_model, linear_layer_size, dropout = 0.1):
+	def __init__(self, d_model, linear_layer_size, dropout=0.1):
 		"""
 		Constructor method of the feed forward module.
 		:param linear_layer_size: The internal size of the feed forward module
@@ -57,7 +57,7 @@ class MultiHeadSelfAttention(nn.Module):
 		super().__init__()
 
 		# set up the layers for the multi-head-attention module here
-		# n_k, n_v, n_q, n_out = d_model ? todo: sizes
+		# n_k, n_v, n_q, n_out = d_model ? todo: change to Linear
 		self.K = th.empty((n_heads, d_model, d_model), requires_grad=True)
 		self.V = th.empty((n_heads, d_model, d_model), requires_grad=True)
 		self.Q = th.empty((n_heads, d_model, d_model), requires_grad=True)
@@ -112,10 +112,12 @@ class DecoderLayer(nn.Module):
 		"""
 		super().__init__()
 
-		# TODO: define the layers multi-head-attention, feed-forward, dropout
-		#	and normalization layers here. 
-        #   Note that we do not use an Encoder
-		#	and therefore do not require the Encoder-Decoder Attention module!
+		# Define the layers multi-head-attention, feed-forward, dropout
+		# and normalization layers here.
+		# Note that we do not use an Encoder
+		# and therefore do not require the Encoder-Decoder Attention module!
+		self.attention = MultiHeadSelfAttention(n_heads, d_model, dropout)
+		self.linear = FeedForward(d_model, linear_layer_size, dropout)
 
 	def forward(self, x, mask):
 		"""
@@ -125,9 +127,16 @@ class DecoderLayer(nn.Module):
 		:return: The module's output
 		"""
 		
-		# TODO: define the forward pass. Keep in mind to produce residuals
-		#		instead of the absolute values directly.
+		# Define the forward pass. Keep in mind to produce residuals
+		# instead of the absolute values directly.
+		residual = x
+		x = self.attention(x, mask)
+		x = self.linear(x)
+
+		x = x + residual
+
 		return x
+
 
 class Model(nn.Module):
 	"""
@@ -149,7 +158,8 @@ class Model(nn.Module):
 		super().__init__()
 
 		# define linear and decoder layers for the overall model
-		attention_layers = [MultiHeadSelfAttention(n_head, d_model)
+		self.decoders = [DecoderLayer(n_heads, d_model, linear_layer_size, dropout) for _ in num_blocks]
+		self.ff_layers = [FeedForward(d_model, linear_layer_size, dropout) for _ in num_blocks]
 
 	def forward(self, x):
 		"""
