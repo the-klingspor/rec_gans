@@ -10,7 +10,7 @@ __author__ = "Matthias Karlbauer, Jannik Thümmel"
 
 class FeedForward(nn.Module):
 	"""
-	A specific feed forward module that concists of a relu layer followed by a
+	A specific feed forward module that consists of a relu layer followed by a
 	dropout and a linear layer.
 	"""
 
@@ -22,7 +22,10 @@ class FeedForward(nn.Module):
 		"""
 		super().__init__()
 
-		# TODO: define the feed-forward and an according dropout layer here.
+		self.input = nn.Linear(d_model, linear_layer_size)
+		self.activation = nn.ReLU()
+		self.dropout = nn.Dropout(dropout)
+		self.output = nn.Linear(linear_layer_size, d_model)
 
 	def forward(self, x):
 		"""
@@ -30,8 +33,11 @@ class FeedForward(nn.Module):
 		:param x: The input to the module
 		:return: The module's output
 		"""
-		
-		# TODO: implement the forward pass for the feed-forward module here
+
+		x = self.input(x)
+		x = self.activation(x)
+		x = self.dropout(x)
+		x = self.output(x)
 
 		return x
 
@@ -46,11 +52,13 @@ class MultiHeadSelfAttention(nn.Module):
 		Constructor method of the attention module.
 		:param n_heads: The number of attention heads
 		:param d_model: The size of the K, V, Q and output vectors
-        	:param dropout: Probability of dropping out certain neurons
+		:param dropout: Probability of dropping out certain neurons
 		"""
 		super().__init__()
 
 		# TODO: set up the layers for the multi-head-attention module here
+		n_k, n_v, n_q, n_out = d_model
+
 
 	def forward(self, x, mask=None):
 		"""

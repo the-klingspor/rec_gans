@@ -98,9 +98,7 @@ def run_training():
 
             y_hat, _ = model(net_input)
             target = net_label
-            #print("pred: ", y_hat[0])
-            #print("target: ", target[0])
-            loss = criterion(y_hat.squeeze(), target.squeeze())
+            loss = criterion(y_hat.squeeze(), target.squeeze())  # TODO: check squeeze, order of dims for LSTM
 
             # Compute gradients
             loss.backward()
