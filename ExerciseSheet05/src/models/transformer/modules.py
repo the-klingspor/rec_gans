@@ -67,7 +67,7 @@ class MultiHeadSelfAttention(nn.Module):
 		self.to_Q = nn.Linear(d_model, d_model * n_heads, bias=False)
 
 		self.dropout = nn.Dropout(dropout)
-		self.output = nn.Linear(d_model * n_heads, d_model)
+		self.W = nn.Linear(d_model * n_heads, d_model, bias=False)
 
 	def forward(self, x, mask=None):
 		"""
@@ -97,7 +97,14 @@ class MultiHeadSelfAttention(nn.Module):
 
 		# Apply call to self-attention
 		x = self.attention(q, k, v, mask)
-		x = self.output(x)
+
+		# stack heads back together
+		# from	[batch, n_heads, tokens, n_dim]
+		# to 	[tokens, batch, n_dim * n_heads]
+		x = rearrange(x, 'b h t d -> t b (h d)')
+
+		# Scale back to [tokens, batch, n_dim] with linear layer
+		x = self.W(x)
 
 		# apply dropout, not sure if we are supposed to do this here, but
 		# dropout is part of the classes' constructor
@@ -139,10 +146,6 @@ class MultiHeadSelfAttention(nn.Module):
 		# 	to [batch, n_heads, tokens, n_dim]
 		output = th.einsum('b h i j, b h j d -> b h i d', attention, v)
 
-		# stack heads back together
-		# from	[time, n_heads, batch, n_dim]
-		# to 	[time, batch, n_dim * n_heads
-		output = rearrange(output, 'b h t d -> t b (h d)')
 
 		return output
 
