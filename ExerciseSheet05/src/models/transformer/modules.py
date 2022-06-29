@@ -4,6 +4,7 @@ import numpy as np
 import torch as th
 import torch.nn.functional as F
 from torch import nn, einsum
+from einops import rearrange
 
 __author__ = "Matthias Karlbauer, Jannik Thümmel"
 
@@ -47,7 +48,7 @@ class MultiHeadSelfAttention(nn.Module):
 	The core component of the transformer realizing the attention mechanism.
 	"""
 
-	def __init__(self, n_heads, d_model, dropout = 0.1):
+	def __init__(self, n_heads, d_model, dropout=0.1):
 		"""
 		Constructor method of the attention module.
 		:param n_heads: The number of attention heads
@@ -56,14 +57,16 @@ class MultiHeadSelfAttention(nn.Module):
 		"""
 		super().__init__()
 
+		self.n_heads = n_heads
+		self.d_model = d_model
+		self.scaling = d_model ** -0.5
+
 		# set up the layers for the multi-head-attention module here
-		# n_k, n_v, n_q, n_out = d_model ? todo: change to Linear
-		self.K = th.empty((n_heads, d_model, d_model), requires_grad=True)
-		self.V = th.empty((n_heads, d_model, d_model), requires_grad=True)
-		self.Q = th.empty((n_heads, d_model, d_model), requires_grad=True)
+		self.to_K = nn.Linear(d_model, d_model * n_heads, bias=False)
+		self.to_V = nn.Linear(d_model, d_model * n_heads, bias=False)
+		self.to_Q = nn.Linear(d_model, d_model * n_heads, bias=False)
 
 		self.dropout = nn.Dropout(dropout)
-		self.output = th.empty((n_heads * d_model), requires_grad=True)
 
 	def forward(self, x, mask=None):
 		"""
@@ -75,7 +78,24 @@ class MultiHeadSelfAttention(nn.Module):
 		:return: The attention weighted output as linear combination of v
 		"""
 
-		# TODO: define the forward pass of the multi-head-attention here
+		# define the forward pass of the multi-head-attention here
+
+		# Get multi-headed Q, K, V based on input,
+		# 	[batch, tokens, d_model * n_heads]
+		k = self.to_K(x)
+		v = self.to_V(x)
+		q = self.to_Q(x)
+
+		# Rearrange to separate Q, K, V by heads:
+		# 	from
+		# 		[batch, tokens, d_model * n_heads]
+		# 	to  [batch, n_heads, tokens, d_model]
+		k = rearrange(k, 'b t (d h) -> b h t d', d=self.d_model, n=self.n_heads)
+		v = rearrange(v, 'b t (d h) -> b h t d', d=self.d_model, n=self.n_heads)
+		q = rearrange(q, 'b t (d h) -> b h t d', d=self.d_model, n=self.n_heads)
+
+		# Apply call to self-attention
+		x = self.attention(q, k, v, mask)
 
 		return x
 
@@ -90,8 +110,36 @@ class MultiHeadSelfAttention(nn.Module):
 		:return: Weighted linear combination v_hat and the attention weights
 		"""
 
-		# TODO: compute the attention scores, apply the mask and perform the
-		#		attention multiplication here. Remember the scaling factor!
+		# compute the attention scores, apply the mask and perform the
+		# attention multiplication here. Remember the scaling factor!
+
+		# compute the raw attention values using queries and keys
+		# 	from
+		# 	   [batch, n_heads, tokens, n_dim] x [batch, n_heads, tokens, n_dim]
+		# 	to [batch, n_heads, tokens, tokens]
+		attention_raw = th.einsum('b h t1 d, b h t2 d -> b h t1 t2', q, k)
+		attention_raw *= self.scaling
+
+		# apply mask, if available
+		if mask is not None:
+			attention_raw = attention_raw.masked_fill(mask, -np.inf)  # todo warum?
+
+		# get attention scores by normalizing with softmax on last dimension
+		attention = th.softmax(attention_raw, dim=-1)
+
+		# apply attention to the values v
+		v = th.einsum('b h t1 t2, b h t2 d -> b h t1 d', attention, v)
+
+		# stack heads back together
+		# from	[batch, n_heads, tokens, n_dim]
+		# to 	[batch, tokens, n_dim * n_heads
+		v = rearrange(v, 'b h t d -> b t (h d)')
+
+		# apply dropout, not sure if we are supposed to do this here, but
+		# dropout is part of the classes' constructor
+		v = self.dropout(v)
+
+		# todo layer normalization
 
 		return v
 
@@ -118,6 +166,13 @@ class DecoderLayer(nn.Module):
 		# and therefore do not require the Encoder-Decoder Attention module!
 		self.attention = MultiHeadSelfAttention(n_heads, d_model, dropout)
 		self.linear = FeedForward(d_model, linear_layer_size, dropout)
+		# pretty sure this is not needed, because we already use dropout in the
+		# feedforward layer and after applying attention to the values
+		self.dropout = nn.Dropout(dropout)
+
+		self.n_heads = n_heads
+		self.d_model = d_model
+		self.linear_layer_size = linear_layer_size
 
 	def forward(self, x, mask):
 		"""
@@ -133,6 +188,7 @@ class DecoderLayer(nn.Module):
 		x = self.attention(x, mask)
 		x = self.linear(x)
 
+		# add residual connection + dropout ?
 		x = x + residual
 
 		return x
@@ -158,8 +214,9 @@ class Model(nn.Module):
 		super().__init__()
 
 		# define linear and decoder layers for the overall model
+		self.input = nn.Linear(d_one_hot, d_model)
 		self.decoders = [DecoderLayer(n_heads, d_model, linear_layer_size, dropout) for _ in num_blocks]
-		self.ff_layers = [FeedForward(d_model, linear_layer_size, dropout) for _ in num_blocks]
+		self.output = nn.Linear(d_model, d_one_hot)
 
 	def forward(self, x):
 		"""
@@ -167,7 +224,11 @@ class Model(nn.Module):
 		:param x: The input to the module
 		:return: The module's output
 		"""
-		# TODO: implement the forward pass of the model here
+		# implement the forward pass of the model here
+		x = self.input(x)
+		for decoder in self.decoders:
+			x = decoder(x)
+		x = self.output(x)
 
 		return x
 		

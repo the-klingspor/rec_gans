@@ -1,14 +1,12 @@
 {
 	"general": {
-		"device": "CPU"
+		"device": "GPU"
 	},
 
 	"training": {
 		"save_model": true,
-		"_epochs": 2000,
-		"epochs": 200,
-		"_learning_rate": 0.0001,
-		"learning_rate": 0.001
+		"epochs": 2000,
+		"learning_rate": 0.0001
 	},
 
 	"testing": {

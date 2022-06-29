@@ -44,7 +44,8 @@ def run_training():
     model = Model(
         d_one_hot=cfg.model.d_one_hot,
         d_lstm=cfg.model.d_lstm,
-        num_lstm_layers=cfg.model.num_lstm_layers
+        num_lstm_layers=cfg.model.num_lstm_layers,
+        dropout=0.0
     ).to(device=device)
 
     # Count number of trainable parameters
@@ -96,8 +97,11 @@ def run_training():
             # Reset optimizer to clear the previous batch
             optimizer.zero_grad()
 
+            # get predictions for all timestep. Pred at step k should be k+1 st
+            # ground truth token
             y_hat, _ = model(net_input)
-            target = net_label
+            y_hat = y_hat[:-1]
+            target = net_label[1:]
             loss = criterion(y_hat.squeeze(), target.squeeze())  # TODO: check squeeze, order of dims for LSTM
 
             # Compute gradients
