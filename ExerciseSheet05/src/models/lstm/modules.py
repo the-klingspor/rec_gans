@@ -28,7 +28,8 @@ class Model(nn.Module):
 		super().__init__()
 
 		self.input = nn.Linear(d_one_hot, d_lstm, bias=bias)
-		self.lstm = nn.LSTM(d_lstm, d_lstm, num_lstm_layers, bias=bias, dropout=dropout)
+		self.lstm = nn.LSTM(num_layers=num_lstm_layers, input_size=d_lstm,
+							hidden_size=d_lstm, bias=bias, dropout=dropout)
 		self.output = nn.Linear(d_lstm, d_one_hot)
 
 	def forward(self, x, state=None):
@@ -38,8 +39,14 @@ class Model(nn.Module):
 		:return: The module's output
 		"""
 
+		if state:
+			h0, c0 = state
+
 		x = self.input(x)
-		x, (h, c) = self.lstm(x)
+		if state:
+			x, (h, c) = self.lstm(x, (h0.detach(), c0.detach()))
+		else:
+			x, (h, c) = self.lstm(x)
 		x = self.output(x)
 
 		return x, (h, c)

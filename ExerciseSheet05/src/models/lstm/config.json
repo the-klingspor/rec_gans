@@ -5,8 +5,8 @@
 
 	"training": {
 		"save_model": true,
-		"epochs": 2000,
-		"learning_rate": 0.0001
+		"epochs": 1000,
+		"learning_rate": 0.0005
 	},
 
 	"testing": {
@@ -21,7 +21,7 @@
 	"model": {
 		"name": "example_model_name",
 		"d_one_hot": 45,
-		"d_lstm": 128,
+		"d_lstm": 256,
 		"num_lstm_layers": 2
 	}
 }

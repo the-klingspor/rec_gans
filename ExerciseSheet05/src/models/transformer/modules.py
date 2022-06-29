@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import torch
 import torch as th
 import torch.nn.functional as F
 from torch import nn, einsum
-from einops import rearrange
+from einops import rearrange, repeat
 
 __author__ = "Matthias Karlbauer, Jannik Thümmel"
 
@@ -34,7 +35,6 @@ class FeedForward(nn.Module):
 		:param x: The input to the module
 		:return: The module's output
 		"""
-
 		x = self.input(x)
 		x = self.activation(x)
 		x = self.dropout(x)
@@ -67,6 +67,7 @@ class MultiHeadSelfAttention(nn.Module):
 		self.to_Q = nn.Linear(d_model, d_model * n_heads, bias=False)
 
 		self.dropout = nn.Dropout(dropout)
+		self.output = nn.Linear(d_model * n_heads, d_model)
 
 	def forward(self, x, mask=None):
 		"""
@@ -88,14 +89,19 @@ class MultiHeadSelfAttention(nn.Module):
 
 		# Rearrange to separate Q, K, V by heads:
 		# 	from
-		# 		[batch, tokens, d_model * n_heads]
+		# 		[tokens, batch, d_model * n_heads]
 		# 	to  [batch, n_heads, tokens, d_model]
-		k = rearrange(k, 'b t (d h) -> b h t d', d=self.d_model, n=self.n_heads)
-		v = rearrange(v, 'b t (d h) -> b h t d', d=self.d_model, n=self.n_heads)
-		q = rearrange(q, 'b t (d h) -> b h t d', d=self.d_model, n=self.n_heads)
+		k = rearrange(k, 't b (d h) -> b h t d', d=self.d_model, h=self.n_heads)
+		v = rearrange(v, 't b (d h) -> b h t d', d=self.d_model, h=self.n_heads)
+		q = rearrange(q, 't b (d h) -> b h t d', d=self.d_model, h=self.n_heads)
 
 		# Apply call to self-attention
 		x = self.attention(q, k, v, mask)
+		x = self.output(x)
+
+		# apply dropout, not sure if we are supposed to do this here, but
+		# dropout is part of the classes' constructor
+		x = self.dropout(x)
 
 		return x
 
@@ -117,31 +123,28 @@ class MultiHeadSelfAttention(nn.Module):
 		# 	from
 		# 	   [batch, n_heads, tokens, n_dim] x [batch, n_heads, tokens, n_dim]
 		# 	to [batch, n_heads, tokens, tokens]
-		attention_raw = th.einsum('b h t1 d, b h t2 d -> b h t1 t2', q, k)
+		attention_raw = th.einsum('b h i d, b h j d -> b h i j', q, k)
 		attention_raw *= self.scaling
 
 		# apply mask, if available
 		if mask is not None:
-			attention_raw = attention_raw.masked_fill(mask, -np.inf)  # todo warum?
+			attention_raw = attention_raw.masked_fill(mask, float('-inf'))
 
 		# get attention scores by normalizing with softmax on last dimension
 		attention = th.softmax(attention_raw, dim=-1)
 
 		# apply attention to the values v
-		v = th.einsum('b h t1 t2, b h t2 d -> b h t1 d', attention, v)
+		# 	from
+		# 	   [batch, n_heads, tokens, tokens] x [batch, n_heads, tokens, n_dim]
+		# 	to [batch, n_heads, tokens, n_dim]
+		output = th.einsum('b h i j, b h j d -> b h i d', attention, v)
 
 		# stack heads back together
-		# from	[batch, n_heads, tokens, n_dim]
-		# to 	[batch, tokens, n_dim * n_heads
-		v = rearrange(v, 'b h t d -> b t (h d)')
+		# from	[time, n_heads, batch, n_dim]
+		# to 	[time, batch, n_dim * n_heads
+		output = rearrange(output, 'b h t d -> t b (h d)')
 
-		# apply dropout, not sure if we are supposed to do this here, but
-		# dropout is part of the classes' constructor
-		v = self.dropout(v)
-
-		# todo layer normalization
-
-		return v
+		return output
 
 
 class DecoderLayer(nn.Module):
@@ -165,7 +168,9 @@ class DecoderLayer(nn.Module):
 		# Note that we do not use an Encoder
 		# and therefore do not require the Encoder-Decoder Attention module!
 		self.attention = MultiHeadSelfAttention(n_heads, d_model, dropout)
+		self.norm1 = nn.LayerNorm(d_model)
 		self.linear = FeedForward(d_model, linear_layer_size, dropout)
+		self.norm2 = nn.LayerNorm(d_model)
 		# pretty sure this is not needed, because we already use dropout in the
 		# feedforward layer and after applying attention to the values
 		self.dropout = nn.Dropout(dropout)
@@ -184,14 +189,15 @@ class DecoderLayer(nn.Module):
 		
 		# Define the forward pass. Keep in mind to produce residuals
 		# instead of the absolute values directly.
-		residual = x
-		x = self.attention(x, mask)
-		x = self.linear(x)
+		x1 = self.attention(x, mask)
+		residual1 = x
+		x2 = self.norm1(x1 + residual1)  # normalize with first residual
 
-		# add residual connection + dropout ?
-		x = x + residual
+		residual2 = x2
+		x3 = self.linear(x2)
+		x4 = self.norm2(x3 + residual2)  # normalize with second residual
 
-		return x
+		return x4
 
 
 class Model(nn.Module):
@@ -215,7 +221,9 @@ class Model(nn.Module):
 
 		# define linear and decoder layers for the overall model
 		self.input = nn.Linear(d_one_hot, d_model)
-		self.decoders = [DecoderLayer(n_heads, d_model, linear_layer_size, dropout) for _ in num_blocks]
+		self.decoders = nn.ModuleList([DecoderLayer(n_heads, d_model,
+									   linear_layer_size, dropout)
+									   for _ in range(num_blocks)])
 		self.output = nn.Linear(d_model, d_one_hot)
 
 	def forward(self, x):
@@ -225,9 +233,11 @@ class Model(nn.Module):
 		:return: The module's output
 		"""
 		# implement the forward pass of the model here
+		mask = self._mask(x)
+
 		x = self.input(x)
 		for decoder in self.decoders:
-			x = decoder(x)
+			x = decoder(x, mask)
 		x = self.output(x)
 
 		return x
@@ -237,8 +247,10 @@ class Model(nn.Module):
 		Helper function to compute the mask applied to the decoder layer
 		:param x: The input data that should be masked
 		"""
-		device, seq_len = x.device, x.shape[0]    
+		device, seq_len = x.device, x.shape[0]
 
-		# TODO: implement the mask for the decoder here
+		# implement the mask for the decoder here
+		mask = th.ones(seq_len, seq_len, dtype=th.bool).to(device)
+		mask = th.triu(mask, diagonal=1)
 
 		return mask

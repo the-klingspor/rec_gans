@@ -43,7 +43,8 @@ def run_testing():
         linear_layer_size=cfg.model.linear_layer_size,
         d_model=cfg.model.d_model,
         d_one_hot=cfg.model.d_one_hot,
-        num_blocks = cfg.model.num_blocks
+        num_blocks=cfg.model.num_blocks,
+        dropout=cfg.model.dropout
     ).to(device=device)
 
     # Count number of trainable parameters
