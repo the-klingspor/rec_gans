@@ -59,6 +59,7 @@ class MultiHeadSelfAttention(nn.Module):
 
 		self.n_heads = n_heads
 		self.d_model = d_model
+		# self.scaling = (d_model * n_heads) ** -0.5 todo wie sieht der korrekte Scaling Factor aus
 		self.scaling = d_model ** -0.5
 
 		# set up the layers for the multi-head-attention module here
