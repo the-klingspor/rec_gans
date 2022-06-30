@@ -59,8 +59,8 @@ class MultiHeadSelfAttention(nn.Module):
 
 		self.n_heads = n_heads
 		self.d_model = d_model
-		self.d_model_p_head = d_model // n_heads  # latent dimension per head
-		self.scaling = self.d_model_p_head ** -0.5
+		self.d_per_head = d_model // n_heads  # latent dimension per head
+		self.scaling = self.d_per_head ** -0.5
 
 		# set up the layers for the multi-head-attention module here
 		self.to_K = nn.Linear(d_model, d_model, bias=False)
@@ -90,21 +90,20 @@ class MultiHeadSelfAttention(nn.Module):
 
 		# Rearrange to separate Q, K, V by heads:
 		# 	from
-		# 		[tokens, batch, d_model * n_heads]
-		# 	to  [batch, n_heads, tokens, d_model]
-		k = rearrange(k, 't b (d h) -> b h t d', d=self.d_model_p_head, h=self.n_heads)
-		v = rearrange(v, 't b (d h) -> b h t d', d=self.d_model_p_head, h=self.n_heads)
-		q = rearrange(q, 't b (d h) -> b h t d', d=self.d_model_p_head, h=self.n_heads)
+		# 		[tokens, batch, d_model]
+		# 	to  [batch, n_heads, tokens, d_model_per_head]
+		k = rearrange(k, 't b (d h) -> b h t d', d=self.d_per_head, h=self.n_heads)
+		v = rearrange(v, 't b (d h) -> b h t d', d=self.d_per_head, h=self.n_heads)
+		q = rearrange(q, 't b (d h) -> b h t d', d=self.d_per_head, h=self.n_heads)
 
 		# Apply call to self-attention
 		x = self.attention(q, k, v, mask)
 
 		# stack heads back together
-		# from	[batch, n_heads, tokens, n_dim]
-		# to 	[tokens, batch, n_dim * n_heads]
+		# from	[batch, n_heads, tokens, d_model_per_head]
+		# to 	[tokens, batch, n_dim]
 		x = rearrange(x, 'b h t d -> t b (h d)')
 
-		# Scale back to [tokens, batch, n_dim] with linear layer
 		x = self.W(x)
 
 		return x
@@ -125,7 +124,7 @@ class MultiHeadSelfAttention(nn.Module):
 
 		# compute the raw attention values using queries and keys
 		# 	from
-		# 	   [batch, n_heads, tokens, n_dim] x [batch, n_heads, tokens, n_dim]
+		# 	   [batch, n_heads, tokens, d_model_per_head] x [batch, n_heads, tokens, d_mode_per_head]
 		# 	to [batch, n_heads, tokens, tokens]
 		attention_raw = th.einsum('b h i d, b h j d -> b h i j', q, k)
 		attention_raw *= self.scaling
@@ -137,14 +136,12 @@ class MultiHeadSelfAttention(nn.Module):
 		# get attention scores by normalizing with softmax on last dimension
 		attention = th.softmax(attention_raw, dim=-1)
 
-		# apply dropout, not sure if we are supposed to do this here, but
-		# dropout is part of the classes' constructor
 		attention = self.dropout(attention)
 
 		# apply attention to the values v
 		# 	from
-		# 	   [batch, n_heads, tokens, tokens] x [batch, n_heads, tokens, n_dim]
-		# 	to [batch, n_heads, tokens, n_dim]
+		# 	   [batch, n_heads, tokens, tokens] x [batch, n_heads, tokens, d_model_per_head]
+		# 	to [batch, n_heads, tokens, d_model_per_head]
 		output = th.einsum('b h i j, b h j d -> b h i d', attention, v)
 
 		return output
@@ -193,14 +190,12 @@ class DecoderLayer(nn.Module):
 		# Define the forward pass. Keep in mind to produce residuals
 		# instead of the absolute values directly.
 		x1 = self.attention(x, mask)
-		#residual_1 = x
-		#x2 = self.norm1(x1 + residual_1)  # normalize with first residual
-		x2 = self.norm1(x1 + x)
+		residual_1 = x
+		x2 = self.norm1(x1 + residual_1)  # normalize with first residual
 
 		residual_2 = x2
 		x3 = self.linear(x2)
-		#x4 = self.norm2(x3 + residual_2)  # normalize with second residual
-		x4 = self.norm2(x3 + x2)
+		x4 = self.norm2(x3 + residual_2)  # normalize with second residual
 
 		return x4
 
