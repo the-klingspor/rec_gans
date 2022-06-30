@@ -134,7 +134,7 @@ def run_testing():
 
         print(f"Initialization: {tolkien_text[:tf_steps]}...")
         print(f"\nTolkien:\n --- {tolkien_text}")
-        print(f"\nLSTM model:\n --- {model_text}")
+        print(f"\nTransformer model:\n --- {model_text}")
 
         exit()
 
