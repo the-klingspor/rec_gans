@@ -59,16 +59,16 @@ class MultiHeadSelfAttention(nn.Module):
 
 		self.n_heads = n_heads
 		self.d_model = d_model
-		# self.scaling = (d_model * n_heads) ** -0.5 todo wie sieht der korrekte Scaling Factor aus
-		self.scaling = d_model ** -0.5
+		self.d_model_p_head = d_model // n_heads  # latent dimension per head
+		self.scaling = self.d_model_p_head ** -0.5
 
 		# set up the layers for the multi-head-attention module here
-		self.to_K = nn.Linear(d_model, d_model * n_heads, bias=False)
-		self.to_V = nn.Linear(d_model, d_model * n_heads, bias=False)
-		self.to_Q = nn.Linear(d_model, d_model * n_heads, bias=False)
+		self.to_K = nn.Linear(d_model, d_model, bias=False)
+		self.to_V = nn.Linear(d_model, d_model, bias=False)
+		self.to_Q = nn.Linear(d_model, d_model, bias=False)
 
 		self.dropout = nn.Dropout(dropout)
-		self.W = nn.Linear(d_model * n_heads, d_model, bias=False)
+		self.W = nn.Linear(d_model, d_model, bias=False)
 
 	def forward(self, x, mask=None):
 		"""
@@ -92,9 +92,9 @@ class MultiHeadSelfAttention(nn.Module):
 		# 	from
 		# 		[tokens, batch, d_model * n_heads]
 		# 	to  [batch, n_heads, tokens, d_model]
-		k = rearrange(k, 't b (d h) -> b h t d', d=self.d_model, h=self.n_heads)
-		v = rearrange(v, 't b (d h) -> b h t d', d=self.d_model, h=self.n_heads)
-		q = rearrange(q, 't b (d h) -> b h t d', d=self.d_model, h=self.n_heads)
+		k = rearrange(k, 't b (d h) -> b h t d', d=self.d_model_p_head, h=self.n_heads)
+		v = rearrange(v, 't b (d h) -> b h t d', d=self.d_model_p_head, h=self.n_heads)
+		q = rearrange(q, 't b (d h) -> b h t d', d=self.d_model_p_head, h=self.n_heads)
 
 		# Apply call to self-attention
 		x = self.attention(q, k, v, mask)
@@ -106,10 +106,6 @@ class MultiHeadSelfAttention(nn.Module):
 
 		# Scale back to [tokens, batch, n_dim] with linear layer
 		x = self.W(x)
-
-		# apply dropout, not sure if we are supposed to do this here, but
-		# dropout is part of the classes' constructor
-		x = self.dropout(x)
 
 		return x
 
@@ -141,12 +137,15 @@ class MultiHeadSelfAttention(nn.Module):
 		# get attention scores by normalizing with softmax on last dimension
 		attention = th.softmax(attention_raw, dim=-1)
 
+		# apply dropout, not sure if we are supposed to do this here, but
+		# dropout is part of the classes' constructor
+		attention = self.dropout(attention)
+
 		# apply attention to the values v
 		# 	from
 		# 	   [batch, n_heads, tokens, tokens] x [batch, n_heads, tokens, n_dim]
 		# 	to [batch, n_heads, tokens, n_dim]
 		output = th.einsum('b h i j, b h j d -> b h i d', attention, v)
-
 
 		return output
 
@@ -171,9 +170,9 @@ class DecoderLayer(nn.Module):
 		# and normalization layers here.
 		# Note that we do not use an Encoder
 		# and therefore do not require the Encoder-Decoder Attention module!
-		self.attention = MultiHeadSelfAttention(n_heads, d_model, dropout)
+		self.attention = MultiHeadSelfAttention(n_heads=n_heads, d_model=d_model, dropout=dropout)
 		self.norm1 = nn.LayerNorm(d_model)
-		self.linear = FeedForward(d_model, linear_layer_size, dropout)
+		self.linear = FeedForward(d_model=d_model, linear_layer_size=linear_layer_size, dropout=dropout)
 		self.norm2 = nn.LayerNorm(d_model)
 		# pretty sure this is not needed, because we already use dropout in the
 		# feedforward layer and after applying attention to the values
@@ -194,12 +193,14 @@ class DecoderLayer(nn.Module):
 		# Define the forward pass. Keep in mind to produce residuals
 		# instead of the absolute values directly.
 		x1 = self.attention(x, mask)
-		residual1 = x
-		x2 = self.norm1(x1 + residual1)  # normalize with first residual
+		#residual_1 = x
+		#x2 = self.norm1(x1 + residual_1)  # normalize with first residual
+		x2 = self.norm1(x1 + x)
 
-		residual2 = x2
+		residual_2 = x2
 		x3 = self.linear(x2)
-		x4 = self.norm2(x3 + residual2)  # normalize with second residual
+		#x4 = self.norm2(x3 + residual_2)  # normalize with second residual
+		x4 = self.norm2(x3 + x2)
 
 		return x4
 
@@ -225,8 +226,10 @@ class Model(nn.Module):
 
 		# define linear and decoder layers for the overall model
 		self.input = nn.Linear(d_one_hot, d_model)
-		self.decoders = nn.ModuleList([DecoderLayer(n_heads, d_model,
-									   linear_layer_size, dropout)
+		self.decoders = nn.ModuleList([DecoderLayer(n_heads=n_heads,
+													d_model=d_model,
+													linear_layer_size=linear_layer_size,
+												    dropout=dropout)
 									   for _ in range(num_blocks)])
 		self.output = nn.Linear(d_model, d_one_hot)
 
