@@ -125,7 +125,7 @@ def run_training():
         epoch_errors_train.append(np.mean(sequence_errors))
 
         # Save the model to file (if desired)
-        if cfg.training.save_model and np.mean(sequence_errors) < best_train:
+        if cfg.training.save_model and epoch % 100 == 0:
             # Start a separate thread to save the model
             thread = Thread(target=helpers.save_model_to_file(
                 model_src_path=os.path.abspath(""),
@@ -154,6 +154,8 @@ def run_training():
 
     b = time.time()
     print('\nTraining took ' + str(np.round(b - a, 2)) + ' seconds.\n\n')
+
+    np.save(os.path.join(os.path.abspath(""),"checkpoints"),cfg.model.name,"training_error.npy",epoch_errors_train)
 
 
 if __name__ == "__main__":

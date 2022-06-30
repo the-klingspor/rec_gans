@@ -67,7 +67,7 @@ def save_model_to_file(model_src_path, cfg, epoch, epoch_errors_train,
     """
 
     model_save_path = os.path.join(
-        model_src_path, "checkpoints", cfg.model.name
+        model_src_path, "checkpoints", cfg.model.name, "epoch" + str( epoch + 1)
     )
 
     os.makedirs(model_save_path, exist_ok="True")
