@@ -1,5 +1,5 @@
 import torch
-
+import numpy as np
 
 class Planner:
     def predict(self, model, actions, observation):
@@ -46,6 +46,7 @@ class CrossEntropyMethod(Planner):
         criterion=torch.nn.MSELoss(),
         policy_handler=lambda x: x,
         var=0.2,
+        alpha = 0.5
     ):
         Planner.__init__(self)
         self._action_size = action_size
@@ -64,12 +65,32 @@ class CrossEntropyMethod(Planner):
             torch.zeros(self._action_size), torch.eye(self._action_size)
         )
         self._last_actions = None
+        self.alpha = alpha
 
     def __call__(self, model, observation):
+        old_elite_actions = torch.tensor([])
         for _ in range(self._num_inference_cycles):
-
-            # TODO: implement CEM
-            actions = None
+            with torch.no_grad():
+                # TODO: implement CEM
+                actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
+                observations = self.predict(model, actions, observation)
+                loss = torch.tensor([self._criterion(observation) for observation in observations])
+                # loss = self._criterion(observations) 
+            
+                #elite_idxs = np.array(loss).argsort()[: self.num_elites]
+                elite_idxs = loss.argsort()[: self._num_elites]
+                elite_actions = actions[elite_idxs]
+                # take _num_keep_elites from previous run and concat with new elites
+                old_elites_selection = old_elite_actions[torch.randperm(len(old_elite_actions))[:self._num_keep_elites]]
+                elite_actions = torch.cat((elite_actions,old_elites_selection),0)
+                old_elite_actions = elite_actions
+                new_mean = elite_actions.mean(axis=0)
+                new_std = elite_actions.std(axis=0)
+                # Momentum term
+                self._mu = (1 - self.alpha) * new_mean + self.alpha * self._mu  
+                self._var = (1 - self.alpha) * new_std + self.alpha * self._var
+            # self._update_bounds(like_levine=self.like_levine)
+            
 
         # Policy has been optimized; this optimized policy is now propagated
         # once more in forward direction in order to generate the final
