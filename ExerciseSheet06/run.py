@@ -72,8 +72,11 @@ else:
 
 # Define criterion for the CEM planner
 def criterion_simple_environment(observation):
-    target_pos = torch.Tensor([0.5, 0.5]).repeat(observation.shape[0], observation.shape[1], 1)
-    loss_pos = torch.nn.functional.mse_loss(observation, target_pos)
+    # target_pos = torch.Tensor([0.5, 0.5]).repeat(observation.shape[0], observation.shape[1], 1)
+    # loss_pos = torch.nn.functional.mse_loss(observation, target_pos)
+    target_pos = torch.Tensor([0.5, 0.5]).repeat(observation.shape[0], 1)
+    loss = torch.nn.MSELoss(reduction='none')
+    loss_pos = torch.sum(loss(observation, target_pos),dim=1)
     return loss_pos
 
 def criterion_lunar_lander(observation):
@@ -129,7 +132,7 @@ planner_cem = planners.CrossEntropyMethod(
 # Initialize optimizer
 if train:
     # TODO: define optimizer
-    optimizer = None
+    optimizer = torch.optim.Adam(model.parameters(),lr=0.005)
 
 
 # Adapt if necessary

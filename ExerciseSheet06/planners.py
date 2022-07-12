@@ -46,7 +46,7 @@ class CrossEntropyMethod(Planner):
         criterion=torch.nn.MSELoss(),
         policy_handler=lambda x: x,
         var=0.2,
-        alpha = 0.5
+        alpha = 0.1
     ):
         Planner.__init__(self)
         self._action_size = action_size
@@ -66,35 +66,47 @@ class CrossEntropyMethod(Planner):
         )
         self._last_actions = None
         self.alpha = alpha
+        
 
     def __call__(self, model, observation):
         old_elite_actions = torch.tensor([])
+        old_mean = torch.zeros(self._action_size)
+        old_var = torch.eye(self._action_size)
         for _ in range(self._num_inference_cycles):
             with torch.no_grad():
                 # TODO: implement CEM
                 actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
                 observations = self.predict(model, actions, observation)
-                loss = torch.tensor([self._criterion(observation) for observation in observations])
-                # loss = self._criterion(observations) 
+                observations = torch.stack(observations)#[None]
+                # loss = torch.tensor([self._criterion(obs) for obs in observations])
+                loss = self._criterion(observations) 
             
                 #elite_idxs = np.array(loss).argsort()[: self.num_elites]
                 elite_idxs = loss.argsort()[: self._num_elites]
                 elite_actions = actions[elite_idxs]
                 # take _num_keep_elites from previous run and concat with new elites
-                old_elites_selection = old_elite_actions[torch.randperm(len(old_elite_actions))[:self._num_keep_elites]]
+                # old_elites_selection = old_elite_actions[torch.randperm(len(old_elite_actions))[:self._num_keep_elites]]
+                old_elites_selection = old_elite_actions[:self._num_keep_elites]
                 elite_actions = torch.cat((elite_actions,old_elites_selection),0)
                 old_elite_actions = elite_actions
                 new_mean = elite_actions.mean(axis=0)
-                new_std = elite_actions.std(axis=0)
+                new_std = torch.diag(elite_actions.std(axis=0))
                 # Momentum term
-                self._mu = (1 - self.alpha) * new_mean + self.alpha * self._mu  
-                self._var = (1 - self.alpha) * new_std + self.alpha * self._var
+                mean = (1 - self.alpha) * new_mean + self.alpha * old_mean
+                var = (1 - self.alpha) * new_std + self.alpha * old_var
+                old_mean = mean
+                old_var  = var
+                # set dist
+                self._dist = torch.distributions.MultivariateNormal(
+                    mean, var
+                )
             # self._update_bounds(like_levine=self.like_levine)
             
 
         # Policy has been optimized; this optimized policy is now propagated
         # once more in forward direction in order to generate the final
         # observations to be returned
+        actions = actions[None]
         actions = actions.permute(1, 0, 2)  # [time, batch, action]
         with torch.no_grad():
             observations = self.predict(model, actions[:, 0, :], observation)
@@ -105,6 +117,6 @@ class CrossEntropyMethod(Planner):
             # Reset the variance
             self._var = self._var_init.clone()
             # Shift elites to keep for one time step
-            self._last_actions[:, :-1] = self._last_actions[:, 1:].clone()
+            # self._last_actions[:, :-1] = self._last_actions[:, 1:].clone()
 
         return actions[:, 0, :], observations
