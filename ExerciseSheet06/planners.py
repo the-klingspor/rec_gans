@@ -38,7 +38,7 @@ class CrossEntropyMethod(Planner):
     def __init__(
         self,
         action_size=2,
-        horizon=50,
+        horizon=5,
         num_inference_cycles=2,
         num_predictions=50,
         num_elites=5,
@@ -74,15 +74,24 @@ class CrossEntropyMethod(Planner):
 
     def __call__(self, model, observation):
         old_elite_actions = torch.tensor([])
-        # self._dist = torch.distributions.MultivariateNormal(
-        #             self._mu, self._var
-        #         )
+        self._dist = torch.distributions.MultivariateNormal(
+                    self._mu, torch.stack([torch.diag(actions) for actions in self._var])
+                )
+        # print("new cycle")
         for _ in range(self._num_inference_cycles):
             with torch.no_grad():
                 # TODO: implement CEM
                 # actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
                 actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
                 observations = torch.stack([torch.stack(self.predict(model, action, observation)) for action in actions])
+                
+                # observations = torch.zeros([self._num_predictions,self._horizon,observation.shape[-1]])
+                # observations = []
+                # for index,action in enumerate(actions):
+                #     # observations[index] = torch.tensor(self.predict(model, action, observation).tolist())
+                #     observations.append(self.predict(model, action, observation))
+                # observations = torch.tensor(observations)    
+                                
                 # observations = torch.stack(observations)#[None]
                 # loss = torch.tensor([self._criterion(obs) for obs in observations])
                 loss = self._criterion(observations) 
@@ -96,7 +105,7 @@ class CrossEntropyMethod(Planner):
                 elite_actions = torch.cat((elite_actions,old_elites_selection),0)
                 old_elite_actions = elite_actions
                 new_mean = elite_actions.mean(axis=0)
-                new_std = elite_actions.std(axis=0)
+                new_std = elite_actions.std(axis=0)**2
                 # Momentum term
                 self._mu= (1 - self.alpha) * new_mean + self.alpha * self._mu
                 self._var  = (1 - self.alpha) * new_std + self.alpha * self._var
