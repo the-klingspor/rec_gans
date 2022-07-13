@@ -102,13 +102,13 @@ class CrossEntropyMethod(Planner):
                 # take _num_keep_elites from previous run and concat with new elites
                 # old_elites_selection = old_elite_actions[torch.randperm(len(old_elite_actions))[:self._num_keep_elites]]
                 old_elites_selection = old_elite_actions[:self._num_keep_elites]
-                elite_actions = torch.cat((elite_actions,old_elites_selection),0)
+                elite_actions = torch.cat((elite_actions, old_elites_selection),0)
                 old_elite_actions = elite_actions
                 new_mean = elite_actions.mean(axis=0)
-                new_std = elite_actions.std(axis=0)**2
+                new_var = elite_actions.std(axis=0)**2
                 # Momentum term
-                self._mu= (1 - self.alpha) * new_mean + self.alpha * self._mu
-                self._var  = (1 - self.alpha) * new_std + self.alpha * self._var
+                self._mu = (1 - self.alpha) * new_mean + self.alpha * self._mu
+                self._var = (1 - self.alpha) * new_var + self.alpha * self._var
                 # old_mean = self._mu
                 # old_var  = self._var
                 # set dist
