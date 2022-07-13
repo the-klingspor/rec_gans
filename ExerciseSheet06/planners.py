@@ -60,9 +60,13 @@ class CrossEntropyMethod(Planner):
 
         self._mu = torch.zeros([self._horizon, self._action_size])
         self._var_init = var * torch.ones([self._horizon, self._action_size])
+        self._covariance_init = var * torch.eye(self._action_size,self._action_size).unsqueeze(1).permute(0,2,1).repeat(1,1,self._horizon).permute(2,0,1)
         self._var = self._var_init.clone().detach()
+        # self._dist = torch.distributions.MultivariateNormal(
+        #     torch.zeros(self._action_size), torch.eye(self._action_size)
+        # )
         self._dist = torch.distributions.MultivariateNormal(
-            torch.zeros(self._action_size), torch.eye(self._action_size)
+            self._mu, self._covariance_init
         )
         self._last_actions = None
         self.alpha = alpha
@@ -70,17 +74,16 @@ class CrossEntropyMethod(Planner):
 
     def __call__(self, model, observation):
         old_elite_actions = torch.tensor([])
-        old_mean = self._mu[0]
-        old_var = self._var[0]
-        self._dist = torch.distributions.MultivariateNormal(
-                    self._mu[0], torch.eye(self._action_size)
-                )
+        # self._dist = torch.distributions.MultivariateNormal(
+        #             self._mu, self._var
+        #         )
         for _ in range(self._num_inference_cycles):
             with torch.no_grad():
                 # TODO: implement CEM
+                # actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
                 actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
-                observations = self.predict(model, actions, observation)
-                observations = torch.stack(observations)#[None]
+                observations = torch.stack([torch.stack(self.predict(model, action, observation)) for action in actions])
+                # observations = torch.stack(observations)#[None]
                 # loss = torch.tensor([self._criterion(obs) for obs in observations])
                 loss = self._criterion(observations) 
             
@@ -93,15 +96,15 @@ class CrossEntropyMethod(Planner):
                 elite_actions = torch.cat((elite_actions,old_elites_selection),0)
                 old_elite_actions = elite_actions
                 new_mean = elite_actions.mean(axis=0)
-                new_std = torch.diag(elite_actions.std(axis=0))
+                new_std = elite_actions.std(axis=0)
                 # Momentum term
-                mean = (1 - self.alpha) * new_mean + self.alpha * old_mean
-                var = (1 - self.alpha) * new_std + self.alpha * old_var
-                old_mean = mean
-                old_var  = var
+                self._mu= (1 - self.alpha) * new_mean + self.alpha * self._mu
+                self._var  = (1 - self.alpha) * new_std + self.alpha * self._var
+                # old_mean = self._mu
+                # old_var  = self._var
                 # set dist
                 self._dist = torch.distributions.MultivariateNormal(
-                    mean, var
+                    self._mu, torch.stack([torch.diag(actions) for actions in self._var])
                 )
             # self._update_bounds(like_levine=self.like_levine)
             
@@ -109,7 +112,7 @@ class CrossEntropyMethod(Planner):
         # Policy has been optimized; this optimized policy is now propagated
         # once more in forward direction in order to generate the final
         # observations to be returned
-        actions = actions[None]
+        actions = actions[0][None]
         actions = actions.permute(1, 0, 2)  # [time, batch, action]
         with torch.no_grad():
             observations = self.predict(model, actions[:, 0, :], observation)

@@ -1,6 +1,6 @@
 {
 	"general": {
-		"device": "GPU"
+		"device": "CPU"
 	},
 
 	"training": {
