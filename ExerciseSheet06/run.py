@@ -83,26 +83,27 @@ def criterion_simple_environment(observation): # [num_predictions, horizon, obse
 
 def criterion_lunar_lander(observation): # [num_predictions, horizon, observation_size] 
     # Adapt this if necessary
-    target_pos_x = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
-    target_pos_y = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
-    target_ang = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
+    n_pred, n_horizon, n_obs = observation.shape
+    target_pos_x = torch.Tensor([0]).repeat(n_pred, n_horizon, 1)
+    target_pos_y = torch.Tensor([0]).repeat(n_pred, n_horizon, 1)
+    target_ang = torch.Tensor([0]).repeat(n_pred, n_horizon, 1)
 
     mse = torch.nn.MSELoss(reduction='none')
     
-    loss_pos_x = 2.4 * torch.sum(mse(observation[..., 0:1], target_pos_x),dim=(1,2))
-    loss_pos_y = 0.2 * torch.sum(mse(observation[..., 1:2], target_pos_y),dim=(1,2))
-    loss_ang = 1.4 * torch.sum(mse(observation[..., 4:5], target_ang),dim=(1,2))
+    loss_pos_x = 2.4 * torch.sum(mse(observation[..., 0:1], target_pos_x), dim=(1, 2))
+    loss_pos_y = 0.2 * torch.sum(mse(observation[..., 1:2], target_pos_y), dim=(1, 2))
+    loss_ang = 1.4 * torch.sum(mse(observation[..., 4:5], target_ang), dim=(1, 2))
 
     loss_vel_y2 = []
-    for observation in observation:
-        observation = observation[None]
-        target_vel_y = torch.Tensor([-0.1]).repeat(observation.shape[0], observation.shape[1], 1)
-        loss_vel_y = torch.nn.functional.mse_loss(observation[..., 3:4], target_vel_y, reduction="none").squeeze()
+    for obs in observation:
+        obs = obs[None]
+        target_vel_y = torch.Tensor([-0.1]).repeat(1, n_horizon, 1)
+        loss_vel_y = torch.nn.functional.mse_loss(obs[..., 3:4], target_vel_y, reduction="none").squeeze()
         # loss_vel_y = torch.sum(mse(observation[..., 3:4], target_vel_y),dim=(1,2))
         
-        factor_vel_y = torch.zeros(target_pos_y.shape[0])
-        factor_vel_y[observation[..., 1:2].squeeze() < 0.5] = 0.3
-        factor_vel_y[observation[..., 1:2].squeeze() < 0.2] = 0.5
+        factor_vel_y = torch.zeros(n_horizon)
+        factor_vel_y[obs[..., 1:2].squeeze() < 0.5] = 0.3
+        factor_vel_y[obs[..., 1:2].squeeze() < 0.2] = 0.5
         loss_vel_y = (factor_vel_y * loss_vel_y).mean()
         loss_vel_y2.append(loss_vel_y)
     loss_vel_y = torch.tensor(loss_vel_y2)
@@ -118,7 +119,7 @@ else:
 # Initialize planner
 horizon = 50
 num_inference_cycles = 3
-num_predictions = 50
+num_predictions = 40
 num_elites = 5
 num_keep_elites = 2
 

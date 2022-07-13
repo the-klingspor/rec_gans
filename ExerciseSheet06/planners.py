@@ -4,6 +4,12 @@ import numpy as np
 
 class Planner:
     def predict(self, model, actions, observation):
+        if len(actions.shape) == 3:
+            # more than one prediction ->
+            # change shape from [num_predictions, horizon, n_actions]
+            # to [horizon, num_predictions, n_actions]
+            actions = actions.transpose(0, 1)
+            observation = observation.repeat(actions.shape[1], 1)
         observations = []
         for t in range(self._horizon):
             if len(actions[t].shape) > 1:
@@ -12,6 +18,9 @@ class Planner:
                 inp = torch.cat([observation, actions[t]])
             observation = model.forward(inp)
             observations.append(observation)
+        observations = torch.stack(observations)
+        if len(actions.shape) == 3:
+            observations = observations.transpose(0, 1)  # back to original shape
         return observations
 
     def __call__(self, model, observation):
@@ -83,8 +92,10 @@ class CrossEntropyMethod(Planner):
                 # TODO: implement CEM
                 # actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
                 actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
-                observations = torch.stack([torch.stack(self.predict(model, action, observation)) for action in actions])
-                
+
+                #observations = torch.stack([torch.stack(self.predict(model, action, observation)) for action in actions])
+                observations = self.predict(model, actions, observation)
+
                 # observations = torch.zeros([self._num_predictions,self._horizon,observation.shape[-1]])
                 # observations = []
                 # for index,action in enumerate(actions):
@@ -102,7 +113,7 @@ class CrossEntropyMethod(Planner):
                 # take _num_keep_elites from previous run and concat with new elites
                 # old_elites_selection = old_elite_actions[torch.randperm(len(old_elite_actions))[:self._num_keep_elites]]
                 old_elites_selection = old_elite_actions[:self._num_keep_elites]
-                elite_actions = torch.cat((elite_actions, old_elites_selection),0)
+                elite_actions = torch.cat((elite_actions, old_elites_selection), 0)
                 old_elite_actions = elite_actions
                 new_mean = elite_actions.mean(axis=0)
                 new_var = elite_actions.std(axis=0)**2

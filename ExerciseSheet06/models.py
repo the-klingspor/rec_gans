@@ -49,4 +49,4 @@ class NeuralNetworkModel(torch.nn.Module):
         model_out = self.model(normal_input)
 
         # return predicted state, model learns residual change of environment
-        return model_out + x[2:]
+        return model_out + x[..., 2:]
