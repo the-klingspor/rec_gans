@@ -36,7 +36,7 @@ class NeuralNetworkModel(torch.nn.Module):
             #torch.nn.BatchNorm1d(hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_size, output_size, bias=True),
-            torch.nn.Sigmoid()
+            torch.nn.Tanh()
         )
 
     def forward(self, x):
