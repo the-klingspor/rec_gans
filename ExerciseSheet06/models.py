@@ -41,8 +41,12 @@ class NeuralNetworkModel(torch.nn.Module):
 
     def forward(self, x):
         # TODO: implement me
-        Observation_High = torch.tensor([1., 1.,1.5, 1.5, 5., 5., 3.14, 5.]) # 4 actions + 8 obersvations
+        Observation_High = torch.tensor([1., 1., 1.5, 1.5, 5., 5., 3.14, 5.])  # 2 actions + 6 obersvations
         Observation_Low = torch.tensor([-1., -1., -1.5, -1.5, -5., -5., -3.14, -5.])
+
+        # normalize variance, mean is already zero
         normal_input = (x)/(Observation_High - Observation_Low)
         model_out = self.model(normal_input)
-        return model_out
+
+        # return predicted state, model learns residual change of environment
+        return model_out + x[2:]
