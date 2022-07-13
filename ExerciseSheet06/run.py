@@ -189,6 +189,8 @@ while epoch < epochs:
         action = actions[0]
         if train:
             inp = torch.cat([observation_old[..., :-2], torch.Tensor(action)])  # :-2 to Ignore leg contact
+            # Lenny added this
+            #inp = inp.unsqueeze(0) # to work with batchnormalization
             prediction = model.forward(inp)
         observation, _, done, _ = env.step(action.numpy())
         observation = torch.Tensor(observation)

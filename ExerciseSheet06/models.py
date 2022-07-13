@@ -30,21 +30,19 @@ class NeuralNetworkModel(torch.nn.Module):
         # TODO: implement me
         self.model = torch.nn.Sequential(
             torch.nn.Linear(input_size, hidden_size, bias=True),
-            torch.nn.BatchNorm1d(hidden_size),
+            #torch.nn.BatchNorm1d(hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_size, hidden_size, bias=True),
-            torch.nn.BatchNorm1d(hidden_size),
+            #torch.nn.BatchNorm1d(hidden_size),
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_size, output_size, bias=True),
-            torch.nn.BatchNorm1d(hidden_size),
-            torch.nn.ReLU(),
-            torch.nn.Softmax(dim=1)
+            torch.nn.Sigmoid()
         )
 
     def forward(self, x):
         # TODO: implement me
-        Observation_High = torch.tensor([1., 1., 1., 1., 1.5, 1.5, 5., 5., 3.14, 5., 1., 1. ]) # 4 actions + 8 obersvations
-        Observation_Low = torch.tensor([0., 0., 0., 0., -1.5, -1.5, -5., -5., -3.14, -5., -0., -0. ])
-        normal_input = (x - Observation_Low)/(Observation_High - Observation_Low)
+        Observation_High = torch.tensor([1., 1.,1.5, 1.5, 5., 5., 3.14, 5.]) # 4 actions + 8 obersvations
+        Observation_Low = torch.tensor([-1., -1., -1.5, -1.5, -5., -5., -3.14, -5.])
+        normal_input = (x)/(Observation_High - Observation_Low)
         model_out = self.model(normal_input)
         return model_out
