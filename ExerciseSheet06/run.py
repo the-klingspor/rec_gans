@@ -50,7 +50,7 @@ lunar_lander.INITIAL_RANDOM = 500  # Do not change this
 if use_simple_environment:
     env = simple_control_env.SimpleControlGym()
 else:
-    env = gym.make("LunarLander-v2", continuous=True, enable_wind=False)
+    env = gym.make("LunarLander-v2",continuous=True,  enable_wind=False)
 action_size = env.action_space.shape[0]
 observation_size = env.observation_space.shape[0] - 2  # Ignore leg contact
 
@@ -72,6 +72,7 @@ else:
 
 # Define criterion for the CEM planner
 def criterion_simple_environment(observation):
+    # original code ... did changes for batch processing
     # target_pos = torch.Tensor([0.5, 0.5]).repeat(observation.shape[0], observation.shape[1], 1)
     # loss_pos = torch.nn.functional.mse_loss(observation, target_pos)
     target_pos = torch.Tensor([0.5, 0.5]).repeat(observation.shape[0], 1)

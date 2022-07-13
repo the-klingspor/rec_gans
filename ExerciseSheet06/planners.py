@@ -70,8 +70,11 @@ class CrossEntropyMethod(Planner):
 
     def __call__(self, model, observation):
         old_elite_actions = torch.tensor([])
-        old_mean = torch.zeros(self._action_size)
-        old_var = torch.eye(self._action_size)
+        old_mean = self._mu[0]
+        old_var = self._var[0]
+        self._dist = torch.distributions.MultivariateNormal(
+                    self._mu[0], torch.eye(self._action_size)
+                )
         for _ in range(self._num_inference_cycles):
             with torch.no_grad():
                 # TODO: implement CEM
@@ -115,8 +118,8 @@ class CrossEntropyMethod(Planner):
             # Shift means for one time step
             self._mu[:-1] = self._mu[1:].clone()
             # Reset the variance
-            self._var = self._var_init.clone()
+            self._var = self._var_init.clone() #unclear
             # Shift elites to keep for one time step
-            # self._last_actions[:, :-1] = self._last_actions[:, 1:].clone()
+            # self._last_actions[:, :-1] = self._last_actions[:, 1:].clone() #unclear
 
         return actions[:, 0, :], observations
