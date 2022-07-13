@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 
+
 class Planner:
     def predict(self, model, actions, observation):
         observations = []
@@ -46,7 +47,7 @@ class CrossEntropyMethod(Planner):
         criterion=torch.nn.MSELoss(),
         policy_handler=lambda x: x,
         var=0.2,
-        alpha = 0.1
+        alpha=0.1
     ):
         Planner.__init__(self)
         self._action_size = action_size
@@ -71,7 +72,6 @@ class CrossEntropyMethod(Planner):
         self._last_actions = None
         self.alpha = alpha
         
-
     def __call__(self, model, observation):
         old_elite_actions = torch.tensor([])
         # self._dist = torch.distributions.MultivariateNormal(

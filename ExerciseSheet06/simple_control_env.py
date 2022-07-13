@@ -13,8 +13,8 @@ import os
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__)) + '/'
 
-class SimpleControlGym(gym.Env):
 
+class SimpleControlGym(gym.Env):
 
     def __init__(self, r_seed=42):
         super().__init__()

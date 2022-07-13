@@ -78,7 +78,7 @@ def criterion_simple_environment(observation): # [num_predictions, horizon, obse
     # Lennart neu
     # target_pos = torch.Tensor([0.5, 0.5]).repeat(observation.shape[0], 1)
     loss = torch.nn.MSELoss(reduction='none')
-    loss_pos = torch.sum(loss(observation, target_pos),dim=(1,2))
+    loss_pos = torch.sum(loss(observation, target_pos), dim=(1, 2))
     return loss_pos
 
 def criterion_lunar_lander(observation): # [num_predictions, horizon, observation_size] 
