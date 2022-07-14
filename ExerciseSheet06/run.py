@@ -139,17 +139,15 @@ planner_cem = planners.CrossEntropyMethod(
     var=1,
 )
 
-
-# Initialize optimizer
-if train:
-    # TODO: define optimizer
-    optimizer = torch.optim.Adam(model.parameters(),lr=0.005)
-
-
 # Adapt if necessary
 epochs = 3000
 sequence_length = 200
 
+# Initialize optimizer
+if train:
+    # TODO: define optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
 epoch = 0
 losses = []
@@ -234,6 +232,7 @@ while epoch < epochs:
             state_dict,
             os.path.join("models", model_id, f"{epoch:04d}.pth")
         )
+        scheduler.step()
     epoch += 1
     print()
 

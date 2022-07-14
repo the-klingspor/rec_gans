@@ -48,5 +48,5 @@ class NeuralNetworkModel(torch.nn.Module):
         normal_input = x / (Observation_High - Observation_Low)
         model_out = self.model(normal_input)
 
-        # return predicted state, model learns residual change of environment
+        # return predicted state, model learns residual change of environment, ignore action input
         return model_out + x[..., 2:]
