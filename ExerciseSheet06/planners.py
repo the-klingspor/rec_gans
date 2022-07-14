@@ -76,7 +76,7 @@ class CrossEntropyMethod(Planner):
         criterion=torch.nn.MSELoss(),
         policy_handler=lambda x: x,
         var=0.2,
-        alpha=0.01
+        alpha=0.1
     ):
         Planner.__init__(self)
         self._action_size = action_size

@@ -33,7 +33,7 @@ seed = args.seed
 assert(not(use_simple_environment and train))
 
 model_id = "test"
-state_path = None if train else "models/test/2999.pth"
+state_path = None if train else "models/test/5999.pth"
 
 
 torch.manual_seed(seed)
@@ -117,19 +117,23 @@ def criterion_lunar_lander(observation):
     target_pos_x = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
     target_pos_y = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
     target_ang = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
+    target_ang_vel = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
 
-    loss_pos_x = 2.4 * torch.nn.functional.mse_loss(observation[..., 0:1], target_pos_x)
+    loss_pos_x = 3.4 * torch.nn.functional.mse_loss(observation[..., 0:1], target_pos_x)
     loss_pos_y = 0.2 * torch.nn.functional.mse_loss(observation[..., 1:2], target_pos_y)
     loss_ang = 1.4 * torch.nn.functional.mse_loss(observation[..., 4:5], target_ang)
-
+    loss_ang_vel = 0.01 * torch.nn.functional.mse_loss(observation[..., 5:6], target_ang_vel)
+    
+    
     target_vel_y = torch.Tensor([-0.1]).repeat(observation.shape[0], observation.shape[1], 1)
     loss_vel_y = torch.nn.functional.mse_loss(observation[..., 3:4], target_vel_y, reduction="none").squeeze()
     factor_vel_y = torch.zeros(target_pos_y.shape[1])
     factor_vel_y[observation[..., 1:2].squeeze() < 0.5] = 0.03
     factor_vel_y[observation[..., 1:2].squeeze() < 0.2] = 0.5
+    #factor_vel_y[observation[..., 1:2].squeeze() < 0.1] = 1.5
     loss_vel_y = (factor_vel_y * loss_vel_y).mean()
 
-    loss = loss_pos_x + loss_pos_y + loss_vel_y + loss_ang
+    loss = loss_pos_x + loss_pos_y + loss_vel_y + loss_ang# + loss_ang_vel
     return loss
 
 if use_simple_environment:
@@ -140,18 +144,18 @@ else:
 
 # Initialize planner
 # extensive search
-# horizon = 100
-# num_inference_cycles = 5
-# num_predictions = 60
-# num_elites = 5
-# num_keep_elites = 2
-
-# small cem search, for predict_env, since its very slow
 horizon = 50
-num_inference_cycles = 2
+num_inference_cycles = 15
 num_predictions = 20
 num_elites = 5
-num_keep_elites = 2
+num_keep_elites = 1
+
+# small cem search, for predict_env, since its very slow
+# horizon = 50
+# num_inference_cycles = 2
+# num_predictions = 20
+# num_elites = 5
+# num_keep_elites = 2
 
 planner_random = planners.RandomPlanner(
     action_size=action_size,
@@ -170,7 +174,7 @@ planner_cem = planners.CrossEntropyMethod(
 )
 
 # Adapt if necessary
-epochs = 3000
+epochs = 10000
 sequence_length = 200
 
 # Initialize optimizer
@@ -213,7 +217,7 @@ while epoch < epochs:
 
             # Randomly switch between heuristic and random actions to create
             # diverse data
-            if random.random() < 0.02:
+            if random.random() < 0.1:
                 heuristic = not heuristic
         else:
             if use_simple_environment:
