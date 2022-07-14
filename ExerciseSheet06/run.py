@@ -33,7 +33,7 @@ seed = args.seed
 assert(not(use_simple_environment and train))
 
 model_id = "test"
-state_path = None if train else "models/test/0787.pth"
+state_path = None if train else "models/test/2999.pth"
 
 
 torch.manual_seed(seed)
@@ -81,7 +81,8 @@ def criterion_simple_environment(observation): # [num_predictions, horizon, obse
     loss_pos = torch.sum(loss(observation, target_pos), dim=(1, 2))
     return loss_pos
 
-def criterion_lunar_lander(observation): # [num_predictions, horizon, observation_size] 
+# Loss for batches
+def criterion_lunar_lander_batch(observation): # [num_predictions, horizon, observation_size] 
     # Adapt this if necessary
     n_pred, n_horizon, n_obs = observation.shape
     target_pos_x = torch.Tensor([0]).repeat(n_pred, n_horizon, 1)
@@ -110,6 +111,27 @@ def criterion_lunar_lander(observation): # [num_predictions, horizon, observatio
     loss = loss_pos_x + loss_pos_y + loss_vel_y + loss_ang
     return loss
 
+# loss as it was in the Exercise
+def criterion_lunar_lander(observation):
+    # Adapt this if necessary
+    target_pos_x = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
+    target_pos_y = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
+    target_ang = torch.Tensor([0]).repeat(observation.shape[0], observation.shape[1], 1)
+
+    loss_pos_x = 2.4 * torch.nn.functional.mse_loss(observation[..., 0:1], target_pos_x)
+    loss_pos_y = 0.2 * torch.nn.functional.mse_loss(observation[..., 1:2], target_pos_y)
+    loss_ang = 1.4 * torch.nn.functional.mse_loss(observation[..., 4:5], target_ang)
+
+    target_vel_y = torch.Tensor([-0.1]).repeat(observation.shape[0], observation.shape[1], 1)
+    loss_vel_y = torch.nn.functional.mse_loss(observation[..., 3:4], target_vel_y, reduction="none").squeeze()
+    factor_vel_y = torch.zeros(target_pos_y.shape[1])
+    factor_vel_y[observation[..., 1:2].squeeze() < 0.5] = 0.03
+    factor_vel_y[observation[..., 1:2].squeeze() < 0.2] = 0.5
+    loss_vel_y = (factor_vel_y * loss_vel_y).mean()
+
+    loss = loss_pos_x + loss_pos_y + loss_vel_y + loss_ang
+    return loss
+
 if use_simple_environment:
     criterion = criterion_simple_environment
 else:
@@ -117,9 +139,17 @@ else:
 
 
 # Initialize planner
+# extensive search
+# horizon = 100
+# num_inference_cycles = 5
+# num_predictions = 60
+# num_elites = 5
+# num_keep_elites = 2
+
+# small cem search, for predict_env, since its very slow
 horizon = 50
-num_inference_cycles = 3
-num_predictions = 40
+num_inference_cycles = 2
+num_predictions = 20
 num_elites = 5
 num_keep_elites = 2
 
@@ -166,6 +196,7 @@ if not use_simple_environment and state_path:
 
 # Run
 while epoch < epochs:
+    old_actions = []
     observation_old = env.reset(seed=epoch+seed)
     observation_old = torch.Tensor(observation_old)
     loss = 0
@@ -189,14 +220,15 @@ while epoch < epochs:
         else:
             if use_simple_environment:
                 if use_CEM:
-                    actions, _ = planner_cem(model, observation_old)
+                    actions, _ = planner_cem(model, observation_old,old_actions,epoch+seed)
                 else:
                     actions, _ = planner_random(model, observation_old)
             else:
                 # Ignore whether the legs touch the ground during planning
-                actions, _ = planner_cem(model, observation_old[..., :-2])  # :-2 to Ignore leg contact
+                actions, _ = planner_cem(model, observation_old[..., :-2],old_actions,epoch+seed)  # :-2 to Ignore leg contact
 
         action = actions[0]
+        old_actions.append(action)
         if train:
             inp = torch.cat([observation_old[..., :-2], torch.Tensor(action)])  # :-2 to Ignore leg contact
             # Lenny added this
