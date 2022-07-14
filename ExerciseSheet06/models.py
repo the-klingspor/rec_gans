@@ -41,20 +41,13 @@ class NeuralNetworkModel(torch.nn.Module):
 
     def forward(self, x):
         # TODO: implement me
-        Observation_High = torch.tensor([1.5, 1.5, 5., 5., 3.14, 5.,1., 1.])  # 2 actions + 6 observations
+        Observation_High = torch.tensor([1.5, 1.5, 5., 5., 3.14, 5.,1., 1.])  # 6 observations + 2 actions 
         Observation_Low = torch.tensor([-1.5, -1.5, -5., -5., -3.14, -5.,-1., -1.])
 
         # normalize variance, mean is already zero
         normal_input = x / (Observation_High - Observation_Low)
         model_out = self.model(normal_input)
 
-        # return predicted state, model learns residual change of environment
+        # return predicted state, model learns residual change of environment 
+        # actions are at the end actually
         return model_out + x[..., :-2]
-
-class TrueEnvModel:
-    
-    def __init__(self, env):
-        print('hi')
-        
-    def forward(self, x):
-        observation = 'hi'#x[:,:-2,:]
