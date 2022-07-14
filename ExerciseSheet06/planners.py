@@ -110,9 +110,9 @@ class CrossEntropyMethod(Planner):
                 actions = self._policy_handler(self._dist.sample(torch.Size([self._num_predictions])))
 
                 # Neural Net Observations
-                # observations = self.predict(model, actions, observation)
+                observations = self.predict(model, actions, observation)
                 # Environment generated Observations
-                observations = self.predict_env(actions,old_actions,env_seed)
+                # observations = self.predict_env(actions,old_actions,env_seed)
 
                 # Loss Batch calculation (with original loss from exercise sheet)
                 # loss = self._criterion(observations) #batch
@@ -145,9 +145,9 @@ class CrossEntropyMethod(Planner):
         actions = actions[0][None]
         with torch.no_grad():
             # NN Observations
-            # observations = self.predict(model, actions[0, :, :], observation)
+            observations = self.predict(model, actions[0, :, :], observation)
             # Env Observations
-            obs = self.predict_env(actions,old_actions,env_seed)
+            # observations = self.predict_env(actions,old_actions,env_seed)
 
         with torch.no_grad():
             # Shift means for one time step
