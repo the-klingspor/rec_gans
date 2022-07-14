@@ -28,12 +28,12 @@ class Planner:
     def __call__(self, model, observation):
         pass
     
-    def predict_env(self, model, actions,old_actions,seed):
+    def predict_env(self, actions,old_actions,seed):
         # initalize new env with same seed and execute all actions that happend so far
         # to predict new observations
         observations = []
+        env_new = gym.make("LunarLander-v2",continuous=True,  enable_wind=False)
         for num_pred in range(actions.shape[0]):
-            env_new = gym.make("LunarLander-v2",continuous=True,  enable_wind=False)
             observation_old = env_new.reset(seed=seed)
             for action in old_actions:
                 observation__, _, done, _ = env_new.step(action.numpy())
@@ -45,19 +45,6 @@ class Planner:
             observations.append(observation)
         observations = torch.tensor(observations)
         return observations[:,:,:-2]
-    
-    def only_obs_env(self,model, actions,old_actions,seed):
-        env_new = gym.make("LunarLander-v2",continuous=True,  enable_wind=False)
-        observation_old = env_new.reset(seed=seed)
-        for action in old_actions:
-            observation, _, done, _ = env_new.step(action.numpy())
-            
-        observations = []
-        for t in range(self._horizon):
-            observation_single, _, done, _ = env_new.step( actions[t].numpy())
-            observations.append(observation_single)
-        observations = torch.tensor(observations) # back to original shape
-        return observations
 
 
 class RandomPlanner(Planner):
@@ -125,7 +112,7 @@ class CrossEntropyMethod(Planner):
                 # Neural Net Observations
                 # observations = self.predict(model, actions, observation)
                 # Environment generated Observations
-                observations = self.predict_env(model, actions,old_actions,env_seed)
+                observations = self.predict_env(actions,old_actions,env_seed)
 
                 # Loss Batch calculation (with original loss from exercise sheet)
                 # loss = self._criterion(observations) #batch
@@ -156,12 +143,11 @@ class CrossEntropyMethod(Planner):
         # once more in forward direction in order to generate the final
         # observations to be returned
         actions = actions[0][None]
-        actions = actions.permute(1, 0, 2)  # [time, batch, action]
         with torch.no_grad():
             # NN Observations
-            # observations = self.predict(model, actions[:, 0, :], observation)
+            # observations = self.predict(model, actions[0, :, :], observation)
             # Env Observations
-            observations = self.only_obs_env(model, actions[:, 0, :],old_actions,env_seed)
+            obs = self.predict_env(actions,old_actions,env_seed)
 
         with torch.no_grad():
             # Shift means for one time step
@@ -171,4 +157,5 @@ class CrossEntropyMethod(Planner):
             # Shift elites to keep for one time step
             # self._last_actions[:, :-1] = self._last_actions[:, 1:].clone() #unclear
 
+        actions = actions.permute(1, 0, 2)  # [time, batch, action]
         return actions[:, 0, :], observations
